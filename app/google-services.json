@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "976821024682",
+    "project_id": "civara",
+    "storage_bucket": "civara.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:976821024682:android:613003f86ac31e3f305dd3",
+        "android_client_info": {
+          "package_name": "com.example.civara"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyASFNI9oc-BBzI5KmWrNNYyh0jwcxOnDSY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
