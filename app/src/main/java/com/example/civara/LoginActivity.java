@@ -44,44 +44,34 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void loginUser() {
+
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-        if (!validateInput(email, password)) {
-            return;
-        }
+        if (!validateInput(email, password)) return;
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+
                         FirebaseUser user = mAuth.getCurrentUser();
+
                         Toast.makeText(LoginActivity.this,
                                 "Login successful", Toast.LENGTH_SHORT).show();
 
-                        // Navigate to MainActivity (replace with your actual home activity)
-                        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                        // ✅ DIRECT HOME PAGE
+                        Intent intent = new Intent(LoginActivity.this, activity_homepage.class);
                         intent.putExtra("userId", user.getUid());
                         startActivity(intent);
                         finish();
+
                     } else {
-                        String errorMessage = "Login failed. Please try again.";
-
-                        if (task.getException() != null) {
-                            String error = task.getException().getMessage();
-
-                            if (error.contains("user-not-found")) {
-                                errorMessage = "No account found with this email.";
-                            } else if (error.contains("wrong-password")) {
-                                errorMessage = "Incorrect password.";
-                            } else if (error.contains("invalid-email")) {
-                                errorMessage = "Invalid email address.";
-                            }
-                        }
-
-                        Toast.makeText(LoginActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this,
+                                "Login failed", Toast.LENGTH_LONG).show();
                     }
                 });
     }
+
 
     private boolean validateInput(String email, String password) {
         boolean isValid = true;
