@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    
+
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET"/>
-
 
     <application
         android:allowBackup="true"
@@ -17,7 +16,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CIVARA"
         tools:targetApi="31">
-        
+
         <!-- LOGIN Activity (Launcher) -->
         <activity
             android:name=".LoginActivity"
@@ -28,16 +27,24 @@
             </intent-filter>
         </activity>
 
+        <!-- SIGNUP -->
         <activity
             android:name=".SignupActivity"
             android:exported="false" />
 
+        <!-- MAIN / DASHBOARD -->
         <activity
             android:name=".MainActivity"
             android:exported="false" />
-            
+
+        <!-- HOME PAGE -->
         <activity
             android:name=".activity_homepage"
+            android:exported="false" />
+
+        <!-- COMPLAINT DASHBOARD -->
+        <activity
+            android:name=".ComplaintDashboardActivity"
             android:exported="false" />
 
     </application>

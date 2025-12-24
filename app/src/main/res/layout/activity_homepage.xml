@@ -70,11 +70,14 @@
 
         <!-- Complaint -->
         <LinearLayout
+            android:id="@+id/layoutComplaint"
             android:layout_width="0dp"
             android:layout_height="120dp"
             android:layout_columnWeight="1"
             android:orientation="vertical"
             android:gravity="center"
+            android:clickable="true"
+            android:focusable="true"
             android:background="#FDBA74"
             android:layout_margin="8dp"
             android:padding="12dp">
@@ -87,6 +90,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
         </LinearLayout>
+
 
         <!-- SOS -->
         <LinearLayout
