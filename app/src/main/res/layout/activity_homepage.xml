@@ -79,13 +79,6 @@
             android:layout_margin="8dp"
             android:padding="12dp">
 
-            <TextView
-                android:text="Complaint"
-                android:textStyle="bold"
-                android:textColor="#FFFFFF"
-                android:textSize="16sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
         </LinearLayout>
 
         <!-- SOS -->
@@ -128,29 +121,40 @@
                 android:layout_height="wrap_content"/>
         </LinearLayout>
 
-        <!-- Chatbot -->
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="120dp"
-            android:layout_columnWeight="1"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:background="#67E8F9"
-            android:layout_margin="8dp"
-            android:padding="12dp">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_row="0"
+            android:layout_column="3"
+            android:text="Complaint"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
-            <TextView
-                android:text="Chatbot"
-                android:textStyle="bold"
-                android:textColor="#0F172A"
-                android:textSize="16sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
+        <!-- Chatbot -->
 
     </GridLayout>
 
     <!-- LOGOUT BUTTON -->
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="120dp"
+        android:layout_columnWeight="1"
+        android:layout_margin="8dp"
+        android:background="#67E8F9"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="12dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Chatbot"
+            android:textColor="#0F172A"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/btnLogout"
         android:text="Logout"
