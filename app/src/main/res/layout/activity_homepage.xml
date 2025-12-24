@@ -1,35 +1,163 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#E3F2FD"
-    android:padding="16dp">
+    android:background="#F4F8FF">
 
-    <TextView
-        android:id="@+id/txtUser"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Welcome"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#0D47A1"
-        android:layout_gravity="center"/>
-
-    <Button
-        android:id="@+id/btnViewProfile"
+    <!-- HEADER -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="View Profile"
-        android:layout_marginTop="30dp"/>
+        android:padding="16dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
+        <ImageView
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:src="@android:drawable/sym_def_app_icon"
+            android:background="@android:drawable/dialog_holo_light_frame"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="12dp">
+
+            <TextView
+                android:id="@+id/txtUser"
+                android:text="Welcome to Civara"
+                android:textStyle="bold"
+                android:textSize="18sp"
+                android:textColor="#0B1220"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Smart Governance System"
+                android:textSize="13sp"
+                android:textColor="#6B7280"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <ImageView
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@android:drawable/ic_dialog_info"/>
+    </LinearLayout>
+
+    <!-- SHORTCUT TITLE -->
+    <TextView
+        android:text="Shortcuts"
+        android:textStyle="bold"
+        android:textSize="16sp"
+        android:textColor="#111827"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"/>
+
+    <!-- SHORTCUT GRID -->
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:columnCount="2"
+        android:padding="16dp">
+
+        <!-- Complaint -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#FDBA74"
+            android:layout_margin="8dp"
+            android:padding="12dp">
+
+            <TextView
+                android:text="Complaint"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- SOS -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#BFDBFE"
+            android:layout_margin="8dp"
+            android:padding="12dp">
+
+            <TextView
+                android:text="SOS Safety"
+                android:textStyle="bold"
+                android:textColor="#1E3A8A"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Notices -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#93C5FD"
+            android:layout_margin="8dp"
+            android:padding="12dp">
+
+            <TextView
+                android:text="Notices"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Chatbot -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="120dp"
+            android:layout_columnWeight="1"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:background="#67E8F9"
+            android:layout_margin="8dp"
+            android:padding="12dp">
+
+            <TextView
+                android:text="Chatbot"
+                android:textStyle="bold"
+                android:textColor="#0F172A"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+    </GridLayout>
+
+    <!-- LOGOUT BUTTON -->
     <Button
         android:id="@+id/btnLogout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:text="Logout"
-        android:layout_marginTop="10dp"
-        android:backgroundTint="#D32F2F"
-        android:textColor="#FFFFFF"/>
+        android:layout_margin="16dp"
+        android:backgroundTint="#DC2626"
+        android:textColor="#FFFFFF"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
 </LinearLayout>
