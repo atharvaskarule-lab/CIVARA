@@ -1,15 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:padding="16dp"
+    android:background="@color/light_blue_background">
 
+    <!-- Header -->
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Page under construction"
-        android:textSize="18sp"
-        android:textColor="#000000" />
+        android:text="@string/status_screen_title"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:padding="16dp"
+        android:gravity="center"
+        android:background="@color/primary_blue"
+        android:textColor="@color/white"
+        android:layout_marginBottom="16dp"/>
 
+    <!-- Placeholder for complaint status list -->
+    <TextView
+        android:id="@+id/tvStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/status_placeholder"
+        android:textSize="16sp"
+        android:textColor="@color/text_primary_dark"
+        android:padding="12dp"
+        android:background="@color/light_blue_foreground"
+        android:layout_marginBottom="16dp"
+        android:scrollbars="vertical"/>
+
+    <!-- Button to view all complaints -->
+    <Button
+        android:id="@+id/btnViewComplaints"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/action_view_my_complaints"
+        android:backgroundTint="@color/button_green"
+        android:textColor="@color/white"
+        android:padding="12dp"/>
 </LinearLayout>

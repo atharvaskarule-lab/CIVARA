@@ -1,9 +1,33 @@
 <resources>
+    <!-- App Name -->
     <string name="app_name">CIVARA</string>
-<!-- Strings for Login Screen -->
+
+    <!-- Strings for Login Screen -->
     <string name="login_title">CIVARA Login</string>
     <string name="hint_email">Email</string>
     <string name="hint_password">Password</string>
     <string name="action_login">Login</string>
-    <string name="prompt_signup">Don\'t have an account? Sign Up</string>
+    <string name="prompt_signup">Dont have an account? Sign Up</string>
+
+    <!-- Strings for Complaint Status Screen -->
+    <string name="status_screen_title">Complaint Status</string>
+    <string name="status_placeholder">Complaint 1: In Progress\nComplaint 2: Solved</string>
+    <string name="action_view_my_complaints">View My Complaints</string>
+
+    <!-- Strings for Dashboard Screen -->
+    <string name="dashboard_portal_title">Dashboard Portal</string>
+    <string name="dashboard_subtitle">Welcome to your dashboard</string>
+    <string name="dashboard_action_file">File Complaint</string>
+    <string name="dashboard_action_status">Check Status</string>
+    <string name="dashboard_action_view">View Complaint</string>
+
+    <!-- Strings for File Complaint Screen -->
+    <string name="complaint_description_title">Describe your Complaint</string>
+    <string name="complaint_description_hint">Write your complaint here...</string>
+    <string name="complaint_type_title">Select Complaint Type</string>
+    <string name="complaint_type_garbage">Garbage</string>
+    <string name="complaint_type_road_damage">Road Damage</string>
+    <string name="complaint_type_water_supply">Water Supply</string>
+    <string name="action_upload_image">Upload Image</string>
+    <string name="action_submit_complaint">Submit Complaint</string>
 </resources>

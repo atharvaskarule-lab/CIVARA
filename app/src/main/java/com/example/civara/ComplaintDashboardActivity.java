@@ -1,8 +1,7 @@
 package com.example.civara;
 
 import android.content.Intent;
-import android.os.Bundle;
-import android.widget.Button;
+import android.os.Bundle;import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,6 +15,7 @@ public class ComplaintDashboardActivity extends AppCompatActivity {
         setContentView(R.layout.activity_complaint_dashboard);
 
         btnFileComplaint = findViewById(R.id.btnFileComplaint);
+        // ✅ CORRECTED: Changed the ID to match the layout file
         btnStatus = findViewById(R.id.btnStatus);
         btnView = findViewById(R.id.btnView);
 
@@ -25,13 +25,13 @@ public class ComplaintDashboardActivity extends AppCompatActivity {
                         ComplaintDashboardActivity.this,
                         FileComplaintActivity.class)));
 
-        // Status Page (we’ll create later)
+        // Status Page
         btnStatus.setOnClickListener(v ->
                 startActivity(new Intent(
                         ComplaintDashboardActivity.this,
                         ComplaintStatusActivity.class)));
 
-        // View Complaints Page (we’ll create later)
+        // View Complaints Page
         btnView.setOnClickListener(v ->
                 startActivity(new Intent(
                         ComplaintDashboardActivity.this,

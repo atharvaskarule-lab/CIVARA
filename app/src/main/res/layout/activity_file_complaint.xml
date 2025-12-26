@@ -1,15 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
-    android:orientation="vertical">
+    android:background="#F4F8FF"
+    android:padding="16dp">
 
-    <TextView
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Page under construction"
-        android:textSize="18sp"
-        android:textColor="#000000" />
+        android:orientation="vertical">
 
-</LinearLayout>
+        <!-- Complaint Description -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/complaint_description_title"
+            android:textSize="18sp"
+            android:textColor="#111827"
+            android:layout_marginBottom="8dp"/>
+
+        <EditText
+            android:id="@+id/etDescription"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:hint="@string/complaint_description_hint"
+            android:background="@drawable/edit_text_bg"
+            android:padding="10dp"
+            android:gravity="top"
+            android:inputType="textMultiLine"/>
+
+        <!-- Complaint Type -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/complaint_type_title"
+            android:textSize="16sp"
+            android:textColor="#111827"
+            android:layout_marginTop="16dp"/>
+
+        <CheckBox
+            android:id="@+id/cbGarbage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/complaint_type_garbage"/>
+
+        <CheckBox
+            android:id="@+id/cbRoadDamage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/complaint_type_road_damage"/>
+
+        <CheckBox
+            android:id="@+id/cbWaterSupply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/complaint_type_water_supply"/>
+
+        <!-- Buttons -->
+        <Button
+            android:id="@+id/btnUploadImage"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/action_upload_image"
+            android:layout_marginTop="16dp"
+            android:backgroundTint="#2563EB"
+            android:textColor="#FFFFFF"/>
+
+        <Button
+            android:id="@+id/btnSubmitComplaint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/action_submit_complaint"
+            android:layout_marginTop="24dp"
+            android:backgroundTint="#22C55E"
+            android:textColor="#FFFFFF"/>
+    </LinearLayout>
+</ScrollView>
