@@ -33,4 +33,11 @@
     <!-- <color name="purple_700">#FF3700B3</color> -->
 
     <!-- <color name="black">#FF000000</color> -->
+
+    <!-- Other colors like purple_200, etc. might be here -->
+
+    <!-- ✅ ADD THIS LINE IF IT'S MISSING -->
+    <!-- <color name="black">#FF000000</color> -->
+
+    <!-- <color name="white">#FFFFFFFF</color> -->
 </resources>

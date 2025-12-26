@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+
     <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!-- ✅ ADDED: ACCESS_COARSE_LOCATION for better compatibility and user choice -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <application
         android:allowBackup="true"
@@ -15,38 +19,41 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.CIVARA"
         tools:targetApi="31">
-        <activity
-            android:name=".WeatherActivity"
-            android:exported="false" />
 
         <!-- LOGIN Activity (Launcher) -->
-        <activity
-            android:name=".ComplaintStatusActivity"
-            android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- SIGNUP -->
+        </activity>
+
+        <!-- OTHER ACTIVITIES -->
         <activity
             android:name=".SignupActivity"
-            android:exported="false" /> <!-- MAIN / DASHBOARD -->
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
-            android:exported="false" /> <!-- HOME PAGE -->
-
+            android:exported="false" />
         <activity
             android:name=".activity_homepage"
-            android:exported="false" /> <!-- COMPLAINT DASHBOARD -->
+            android:exported="false" />
         <activity
             android:name=".ComplaintDashboardActivity"
             android:exported="false" />
         <activity
             android:name=".FileComplaintActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ComplaintStatusActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WeatherActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ViewComplaintsActivity"
             android:exported="false" />
 
     </application>

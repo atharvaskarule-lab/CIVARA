@@ -30,4 +30,9 @@
     <string name="complaint_type_water_supply">Water Supply</string>
     <string name="action_upload_image">Upload Image</string>
     <string name="action_submit_complaint">Submit Complaint</string>
+    <string name="openweather_api_key">YOUR_API_KEY</string>
+
+
+        <!-- ... other strings ... -->
+        <!-- <string name="openweather_api_key">YOUR_ACTUAL_API_KEY_HERE</string> -->
 </resources>
