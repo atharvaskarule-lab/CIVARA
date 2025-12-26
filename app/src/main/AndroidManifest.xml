@@ -19,6 +19,9 @@
 
         <!-- LOGIN Activity (Launcher) -->
         <activity
+            android:name=".ComplaintStatusActivity"
+            android:exported="false" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true">
             <intent-filter>
@@ -47,6 +50,9 @@
             android:name=".ComplaintDashboardActivity"
             android:exported="false" />
 
+        <activity
+            android:name=".FileComplaintActivity"
+            android:exported="false" />
     </application>
 
 </manifest>

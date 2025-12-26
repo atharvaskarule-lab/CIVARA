@@ -4,8 +4,9 @@ plugins {
 }
 
 android {
+    // ✅ CORRECTED: Added a newline between these two properties
     namespace = "com.example.civara"
-    compileSdk = 36
+    compileSdk =36
 
     defaultConfig {
         applicationId = "com.example.civara"
@@ -27,31 +28,32 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
+    // AndroidX & UI
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
+
+    // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    // Firebase
+    // Only one Firebase BOM is declared to manage versions.
     implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
+
+    // Firebase libraries (versions are now managed by the BOM above)
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-firestore")
-    implementation (platform("com.google.firebase:firebase-bom:32.7.0"))
-    implementation("com.google.firebase:firebase-auth")
-    implementation("com.google.firebase:firebase-database")
-    
 
-
-
+    // ✅ CORRECTED: Reverted to the hardcoded string because the 'libs' alias was incorrect.
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }

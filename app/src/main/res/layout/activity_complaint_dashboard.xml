@@ -3,17 +3,17 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F4F8FF">
+    android:background="@color/app_background_light">
 
     <!-- Header -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Complaint Portal"
+        android:text="@string/dashboard_portal_title"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#FFFFFF"
-        android:background="#2563EB"
+        android:textColor="@color/white"
+        android:background="@color/primary_blue"
         android:padding="16dp"
         android:gravity="center" />
 
@@ -22,10 +22,10 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:text="Register and track civic complaints"
+        android:text="@string/dashboard_subtitle"
         android:gravity="center"
         android:textSize="16sp"
-        android:textColor="#111827" />
+        android:textColor="@color/text_primary_dark" />
 
     <!-- Bottom Buttons -->
     <LinearLayout
@@ -33,34 +33,35 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:padding="6dp"
-        android:background="#E5E7EB">
+        android:background="@color/bottom_nav_background">
 
         <Button
             android:id="@+id/btnFileComplaint"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="File Complaint"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#F97316"
-            android:layout_height="wrap_content" />
+            android:backgroundTint="@color/button_orange"
+            android:text="@string/dashboard_action_file"
+            android:textColor="@color/white" />
 
+        <!-- ✅ CORRECTED: Removed the invalid comment from inside the tag -->
         <Button
             android:id="@+id/btnStatus"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Status"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#22C55E"
-            android:layout_height="wrap_content" />
+            android:text="@string/dashboard_action_status"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/button_green" />
 
         <Button
             android:id="@+id/btnView"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="View"
-            android:textColor="#FFFFFF"
-            android:backgroundTint="#3B82F6"
-            android:layout_height="wrap_content" />
+            android:text="@string/dashboard_action_view"
+            android:textColor="@color/white"
+            android:backgroundTint="@color/button_blue" />
     </LinearLayout>
 
 </LinearLayout>
