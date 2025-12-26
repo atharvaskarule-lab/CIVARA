@@ -15,6 +15,7 @@ public class activity_homepage extends AppCompatActivity {
 
     TextView txtUser;
     Button btnLogout;
+    Button btnWeather;
     LinearLayout layoutComplaint;
     FirebaseAuth mAuth;
 
@@ -26,6 +27,8 @@ public class activity_homepage extends AppCompatActivity {
         txtUser = findViewById(R.id.txtUser);
         btnLogout = findViewById(R.id.btnLogout);
         layoutComplaint = findViewById(R.id.layoutComplaint);
+        btnWeather = findViewById(R.id.btnWeather);
+
 
         mAuth = FirebaseAuth.getInstance();
         FirebaseUser user = mAuth.getCurrentUser();
@@ -41,6 +44,12 @@ public class activity_homepage extends AppCompatActivity {
                     ComplaintDashboardActivity.class
             ));
         });
+
+        btnWeather.setOnClickListener(v -> {
+            Intent intent = new Intent(activity_homepage.this, WeatherActivity.class);
+            startActivity(intent);
+        });
+
 
         // ✅ LOGOUT ONLY
         btnLogout.setOnClickListener(v -> {
