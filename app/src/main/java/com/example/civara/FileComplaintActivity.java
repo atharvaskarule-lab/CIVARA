@@ -1,205 +1,129 @@
 package com.example.civara;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-
+import com.google.android.material.card.MaterialCardView;
+import com.google.android.material.chip.Chip;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.android.material.textfield.TextInputEditText;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class FileComplaintActivity extends AppCompatActivity {
 
-    EditText etDescription;
-    CheckBox cbGarbage, cbRoadDamage, cbWaterSupply;
-    Button btnUploadImage, btnSubmitComplaint;
+    TextInputEditText etDescription;
+    Chip chipGarbage, chipRoad, chipWater;
+    MaterialCardView btnUploadImage;
+    ImageView ivPreview;
+    TextView tvUploadStatus;
     Uri imageUri;
 
     FusedLocationProviderClient fusedLocationClient;
     double latitude = 0.0, longitude = 0.0;
-
-    FirebaseAuth auth;
     FirebaseFirestore db;
-
-    private static final int LOCATION_PERMISSION_REQUEST = 101;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_file_complaint);
 
-        // 🔹 Initialize Firebase
-        auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-
-        // 🔹 UI references
-        etDescription = findViewById(R.id.etDescription);
-        cbGarbage = findViewById(R.id.cbGarbage);
-        cbRoadDamage = findViewById(R.id.cbRoadDamage);
-        cbWaterSupply = findViewById(R.id.cbWaterSupply);
-        btnUploadImage = findViewById(R.id.btnUploadImage);
-        btnSubmitComplaint = findViewById(R.id.btnSubmitComplaint);
-
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // 🔹 Image picker
+        // Bind UI
+        etDescription = findViewById(R.id.etDescription);
+        chipGarbage = findViewById(R.id.chipGarbage);
+        chipRoad = findViewById(R.id.chipRoad);
+        chipWater = findViewById(R.id.chipWater);
+        btnUploadImage = findViewById(R.id.btnUploadImage);
+        ivPreview = findViewById(R.id.ivPreview);
+        tvUploadStatus = findViewById(R.id.tvUploadStatus);
+
+        findViewById(R.id.btnSubmitComplaint).setOnClickListener(v -> submitComplaint());
+
         btnUploadImage.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
             intent.setType("image/*");
             startActivityForResult(intent, 100);
         });
 
-        // 🔹 Submit complaint
-        btnSubmitComplaint.setOnClickListener(v -> submitComplaint());
-
-        // 🔹 Ask for location permission
         checkLocationPermission();
     }
 
-    // ================= LOCATION PERMISSION =================
-
-    private void checkLocationPermission() {
-        if (ContextCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(
-                    this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_PERMISSION_REQUEST
-            );
-        } else {
-            getLocation();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions,
-                                           int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == LOCATION_PERMISSION_REQUEST) {
-            if (grantResults.length > 0 &&
-                    grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                getLocation();
-            } else {
-                Toast.makeText(this,
-                        "Location permission denied",
-                        Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-
-    private void getLocation() {
-        try {
-            fusedLocationClient.getLastLocation()
-                    .addOnSuccessListener(location -> {
-                        if (location != null) {
-                            latitude = location.getLatitude();
-                            longitude = location.getLongitude();
-                        }
-                    });
-        } catch (SecurityException e) {
-            e.printStackTrace();
-        }
-    }
-
-    // ================= SUBMIT COMPLAINT =================
-
     private void submitComplaint() {
-
-        if (auth.getCurrentUser() == null) {
-            Toast.makeText(this,
-                    "Please login first",
-                    Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         String description = etDescription.getText().toString().trim();
+        StringBuilder typeBuilder = new StringBuilder();
 
-        String type = "";
-        if (cbGarbage.isChecked()) type += "Garbage ";
-        if (cbRoadDamage.isChecked()) type += "Road Damage ";
-        if (cbWaterSupply.isChecked()) type += "Water Supply ";
+        if (chipGarbage.isChecked()) typeBuilder.append("Garbage ");
+        if (chipRoad.isChecked()) typeBuilder.append("Road Damage ");
+        if (chipWater.isChecked()) typeBuilder.append("Water Supply ");
 
-        if (description.isEmpty() || type.isEmpty()) {
-            Toast.makeText(this,
-                    "Please fill all fields",
-                    Toast.LENGTH_SHORT).show();
+        if (description.isEmpty() || typeBuilder.length() == 0) {
+            Toast.makeText(this, "Please select a category and provide a description", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        String userId = auth.getCurrentUser().getUid();
 
         Map<String, Object> complaint = new HashMap<>();
-        complaint.put("userId", userId);
+        complaint.put("userId", FirebaseAuth.getInstance().getUid());
         complaint.put("description", description);
-        complaint.put("type", type.trim());
+        complaint.put("type", typeBuilder.toString().trim());
         complaint.put("latitude", latitude);
         complaint.put("longitude", longitude);
         complaint.put("status", "Pending");
         complaint.put("timestamp", System.currentTimeMillis());
 
-        if (imageUri != null) {
-            complaint.put("imageUri", imageUri.toString());
-        }
+        if (imageUri != null) complaint.put("imageUri", imageUri.toString());
 
-        db.collection("complaints")
-                .add(complaint)
-                .addOnSuccessListener(documentReference -> {
-                    Toast.makeText(this,
-                            "Complaint Submitted",
-                            Toast.LENGTH_SHORT).show();
-
-                    // Clear form
-                    etDescription.setText("");
-                    cbGarbage.setChecked(false);
-                    cbRoadDamage.setChecked(false);
-                    cbWaterSupply.setChecked(false);
-
-                    finish();
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this,
-                            "Error: " + e.getMessage(),
-                            Toast.LENGTH_LONG).show();
-                });
+        db.collection("complaints").add(complaint).addOnSuccessListener(ref -> {
+            Toast.makeText(this, "Complaint Filed Successfully!", Toast.LENGTH_SHORT).show();
+            finish();
+        });
     }
 
-    // ================= IMAGE PICK RESULT =================
+    private void checkLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 101);
+        } else {
+            getLocation();
+        }
+    }
+
+    private void getLocation() {
+        try {
+            fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
+                if (location != null) {
+                    latitude = location.getLatitude();
+                    longitude = location.getLongitude();
+                }
+            });
+        } catch (SecurityException e) { e.printStackTrace(); }
+    }
 
     @Override
-    protected void onActivityResult(int requestCode,
-                                    int resultCode,
-                                    @Nullable Intent data) {
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == 100 &&
-                resultCode == RESULT_OK &&
-                data != null &&
-                data.getData() != null) {
-
+        if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
-            Toast.makeText(this,
-                    "Image Selected",
-                    Toast.LENGTH_SHORT).show();
+            ivPreview.setImageURI(imageUri);
+            ivPreview.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            tvUploadStatus.setText("Image selected successfully");
         }
     }
 }

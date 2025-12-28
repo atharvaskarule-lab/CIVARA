@@ -6,28 +6,25 @@ import android.text.TextUtils;
 import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-
 import java.util.HashMap;
 
 public class SignupActivity extends AppCompatActivity {
 
-    // UI
-    private EditText etName, etEmail, etPassword, etPhone;
+    private TextInputEditText etName, etEmail, etPassword, etPhone;
+    private TextInputLayout tilName, tilEmail, tilPassword, tilPhone;
     private Button btnSignup;
     private ProgressBar progressBar;
     private TextView tvLogin;
 
-    // Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -36,22 +33,25 @@ public class SignupActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
 
-        // UI initialization
+        // UI initialization - IDs match XML exactly
         etName = findViewById(R.id.etName);
         etEmail = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
         etPhone = findViewById(R.id.etPhone);
+
+        tilName = findViewById(R.id.tilName);
+        tilEmail = findViewById(R.id.tilEmail);
+        tilPassword = findViewById(R.id.tilPassword);
+        tilPhone = findViewById(R.id.tilPhone);
+
         btnSignup = findViewById(R.id.btnSignup);
         progressBar = findViewById(R.id.progressBar);
         tvLogin = findViewById(R.id.tvLogin);
 
-        // Firebase initialization
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Click listeners
         btnSignup.setOnClickListener(v -> signupUser());
-
         tvLogin.setOnClickListener(v -> {
             startActivity(new Intent(this, LoginActivity.class));
             finish();
@@ -59,6 +59,9 @@ public class SignupActivity extends AppCompatActivity {
     }
 
     private void signupUser() {
+        // Validation to prevent NullPointerExceptions
+        if (etName.getText() == null || etEmail.getText() == null ||
+                etPassword.getText() == null || etPhone.getText() == null) return;
 
         String name = etName.getText().toString().trim();
         String email = etEmail.getText().toString().trim();
@@ -72,32 +75,21 @@ public class SignupActivity extends AppCompatActivity {
 
         mAuth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(task -> {
-
-                    if (!task.isSuccessful()) {
+                    if (task.isSuccessful()) {
+                        FirebaseUser user = mAuth.getCurrentUser();
+                        if (user != null) {
+                            user.sendEmailVerification();
+                            saveUserToFirestore(user.getUid(), name, email, phone);
+                        }
+                    } else {
                         progressBar.setVisibility(View.GONE);
                         btnSignup.setEnabled(true);
-                        Toast.makeText(
-                                this,
-                                task.getException() != null
-                                        ? task.getException().getMessage()
-                                        : "Signup failed",
-                                Toast.LENGTH_LONG
-                        ).show();
-                        return;
+                        Toast.makeText(this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                     }
-
-                    FirebaseUser user = mAuth.getCurrentUser();
-                    if (user == null) return;
-
-                    // Send email verification (does not block signup)
-                    user.sendEmailVerification();
-
-                    saveUserToFirestore(user.getUid(), name, email, phone);
                 });
     }
 
     private void saveUserToFirestore(String uid, String name, String email, String phone) {
-
         HashMap<String, Object> userMap = new HashMap<>();
         userMap.put("uid", uid);
         userMap.put("name", name);
@@ -105,61 +97,42 @@ public class SignupActivity extends AppCompatActivity {
         userMap.put("phone", phone);
         userMap.put("createdAt", System.currentTimeMillis());
 
-        db.collection("users")
-                .document(uid)
-                .set(userMap)
+        db.collection("users").document(uid).set(userMap)
                 .addOnSuccessListener(unused -> {
-
                     progressBar.setVisibility(View.GONE);
-                    btnSignup.setEnabled(true);
-
-                    Toast.makeText(
-                            this,
-                            "Registration successful! Verify your email.",
-                            Toast.LENGTH_LONG
-                    ).show();
-
+                    Toast.makeText(this, "Success! Verify your email.", Toast.LENGTH_LONG).show();
                     startActivity(new Intent(this, LoginActivity.class));
                     finish();
                 })
                 .addOnFailureListener(e -> {
-
                     progressBar.setVisibility(View.GONE);
                     btnSignup.setEnabled(true);
-
-                    Toast.makeText(
-                            this,
-                            "Firestore error: " + e.getMessage(),
-                            Toast.LENGTH_LONG
-                    ).show();
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
     }
 
     private boolean validateInputs(String name, String email, String password, String phone) {
+        tilName.setError(null);
+        tilEmail.setError(null);
+        tilPassword.setError(null);
+        tilPhone.setError(null);
 
         if (TextUtils.isEmpty(name)) {
-            etName.setError("Name required");
+            tilName.setError("Name required");
             return false;
         }
-
-        if (TextUtils.isEmpty(email)
-                || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            etEmail.setError("Valid email required");
+        if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            tilEmail.setError("Valid email required");
             return false;
         }
-
-        if (TextUtils.isEmpty(password) || password.length() < 6) {
-            etPassword.setError("Minimum 6 characters");
+        if (password.length() < 6) {
+            tilPassword.setError("Min 6 characters");
             return false;
         }
-
-        if (TextUtils.isEmpty(phone)
-                || phone.length() < 10
-                || !phone.matches("\\d+")) {
-            etPhone.setError("Valid phone number required");
+        if (phone.length() < 10) {
+            tilPhone.setError("Invalid phone");
             return false;
         }
-
         return true;
     }
 }

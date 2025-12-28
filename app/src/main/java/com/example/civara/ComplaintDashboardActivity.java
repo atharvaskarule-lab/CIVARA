@@ -1,40 +1,36 @@
 package com.example.civara;
 
 import android.content.Intent;
-import android.os.Bundle;import android.widget.Button;
-
+import android.os.Bundle;
+import android.view.View;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.material.card.MaterialCardView;
 
 public class ComplaintDashboardActivity extends AppCompatActivity {
 
-    Button btnFileComplaint, btnStatus, btnView;
+    // Using MaterialCardView instead of standard Button for a better feel
+    MaterialCardView btnFileComplaint, btnStatus, btnView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // Make status bar icons dark for the light background
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         setContentView(R.layout.activity_complaint_dashboard);
 
+        // Bind Views
         btnFileComplaint = findViewById(R.id.btnFileComplaint);
-        // ✅ CORRECTED: Changed the ID to match the layout file
         btnStatus = findViewById(R.id.btnStatus);
         btnView = findViewById(R.id.btnView);
 
-        // File Complaint Page
+        // Navigation Logic
         btnFileComplaint.setOnClickListener(v ->
-                startActivity(new Intent(
-                        ComplaintDashboardActivity.this,
-                        FileComplaintActivity.class)));
+                startActivity(new Intent(this, FileComplaintActivity.class)));
 
-        // Status Page
         btnStatus.setOnClickListener(v ->
-                startActivity(new Intent(
-                        ComplaintDashboardActivity.this,
-                        ComplaintStatusActivity.class)));
+                startActivity(new Intent(this, ComplaintStatusActivity.class)));
 
-        // View Complaints Page
         btnView.setOnClickListener(v ->
-                startActivity(new Intent(
-                        ComplaintDashboardActivity.this,
-                        ViewComplaintsActivity.class)));
+                startActivity(new Intent(this, ViewComplaintsActivity.class)));
     }
 }

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/nav_home" android:icon="@android:drawable/ic_menu_today" android:title="Home" />
+    <item android:id="@+id/nav_weather" android:icon="@android:drawable/ic_menu_day" android:title="Weather" />
+    <item android:id="@+id/nav_emergency" android:icon="@android:drawable/ic_menu_call" android:title="Emergency" />
+    <item android:id="@+id/nav_more" android:icon="@android:drawable/ic_menu_more" android:title="More" />
+</menu>
