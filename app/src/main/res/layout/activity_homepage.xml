@@ -59,7 +59,7 @@
                     android:layout_width="55dp"
                     android:layout_height="55dp"
                     android:padding="2dp"
-                    android:src="@android:drawable/ic_menu_gallery"
+                    android:src="@drawable/baseline_account_circle_24"
                     app:shapeAppearanceOverlay="@style/CircleImage"
                     app:strokeColor="#7C3AED"
                     app:strokeWidth="2dp" />
@@ -107,11 +107,16 @@
 
                     <ImageButton
                         android:id="@+id/btnNotification"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:src="@android:drawable/ic_popup_reminder"
-                        app:tint="#64748B" />
+                    <<<<<<< HEAD
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    =======
+                    android:layout_width="45dp"
+                    android:layout_height="45dp"
+                    >>>>>>> 2209d4139671b01eae7ecd6e25f5b27080a4eb35
+                    android:background="?attr/selectableItemBackgroundBorderless"
+                    android:src="@drawable/baseline_notifications_active_24"
+                    app:tint="#64748B" />
 
                     <View
                         android:id="@+id/notificationBadge"
@@ -220,7 +225,7 @@
                         android:gravity="center"
                         android:orientation="vertical"
                         android:padding="20dp">
-                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@android:drawable/stat_notify_chat" app:tint="#0D9488" />
+                        <ImageView android:layout_width="32dp" android:layout_height="32dp" android:src="@drawable/chatbot" app:tint="#0D9488" />
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:text="Civara\nChatbot" android:textAlignment="center" android:textColor="#0D9488" android:textStyle="bold" />
                     </LinearLayout>
                 </androidx.cardview.widget.CardView>
