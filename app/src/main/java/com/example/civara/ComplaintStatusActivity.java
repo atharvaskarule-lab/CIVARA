@@ -1,101 +1,97 @@
 package com.example.civara;
 
-import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 public class ComplaintStatusActivity extends AppCompatActivity {
 
-    private Button btnViewComplaints, btnRefresh;
-    private TextView tvStatus, tvCount;
-    private ProgressBar progressBar;
-
+    private TextView tvDetailType, tvDetailDesc, tvDetailDate, tvCurrentStatus;
+    private View step1, step2, step3;
+    private TextView label1, label2, label3;
     private FirebaseFirestore db;
-    private FirebaseAuth auth;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_complaint_status);
 
-        // Link UI components
-        btnViewComplaints = findViewById(R.id.btnViewComplaints);
-        btnRefresh = findViewById(R.id.btnRefresh);
-        tvStatus = findViewById(R.id.tvStatus);
-        tvCount = findViewById(R.id.tvCount);
-        progressBar = findViewById(R.id.progressBar);
-
-        // Initialize Firebase
-        auth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // Fetch data on start
-        loadComplaints();
+        // UI Links
+        tvDetailType = findViewById(R.id.tvDetailType);
+        tvDetailDesc = findViewById(R.id.tvDetailDesc);
+        tvDetailDate = findViewById(R.id.tvDetailDate);
+        tvCurrentStatus = findViewById(R.id.tvCurrentStatus);
+        progressBar = findViewById(R.id.progressBar);
 
-        btnRefresh.setOnClickListener(v -> loadComplaints());
+        // Timeline Links - Ensure these match your XML IDs exactly
+        step1 = findViewById(R.id.step_submitted);
+        step2 = findViewById(R.id.step_progress);
+        step3 = findViewById(R.id.step_resolved);
+        label1 = findViewById(R.id.label_submitted);
+        label2 = findViewById(R.id.label_progress);
+        label3 = findViewById(R.id.label_resolved);
 
-        btnViewComplaints.setOnClickListener(v -> {
-            // Note: Ensure ViewComplaintsActivity exists in your project
-            Intent intent = new Intent(ComplaintStatusActivity.this, ViewComplaintsActivity.class);
-            startActivity(intent);
+        String complaintId = getIntent().getStringExtra("complaintId");
+        if (complaintId != null) {
+            fetchComplaintDetails(complaintId);
+        }
+
+        // Fixed back button reference
+        View backBtn = findViewById(R.id.btnBack);
+        if (backBtn != null) {
+            backBtn.setOnClickListener(v -> finish());
+        }
+    }
+
+    private void fetchComplaintDetails(String id) {
+        progressBar.setVisibility(View.VISIBLE);
+        db.collection("complaints").document(id).get().addOnSuccessListener(doc -> {
+            progressBar.setVisibility(View.GONE);
+            if (doc.exists()) {
+                tvDetailType.setText(doc.getString("type"));
+                tvDetailDesc.setText(doc.getString("description"));
+                tvDetailDate.setText("Filed on: " + doc.getString("date"));
+
+                String status = doc.getString("status");
+                if (status == null) status = "Pending";
+
+                tvCurrentStatus.setText("Current Status: " + status);
+                updateTimeline(status);
+            }
         });
     }
 
-    private void loadComplaints() {
-        if (auth.getCurrentUser() == null) {
-            tvStatus.setText("User not logged in.");
-            return;
+    private void updateTimeline(String status) {
+        int grey = Color.parseColor("#CBD5E1");
+        int active = Color.parseColor("#2563EB"); // Blue
+
+        // Default: Reset all to grey
+        step1.setBackgroundColor(grey);
+        step2.setBackgroundColor(grey);
+        step3.setBackgroundColor(grey);
+        label1.setTextColor(grey);
+        label2.setTextColor(grey);
+        label3.setTextColor(grey);
+
+        // Logic based on status strings in Firestore
+        if (status.equalsIgnoreCase("Pending") || status.equalsIgnoreCase("In Progress") || status.equalsIgnoreCase("Solved")) {
+            step1.setBackgroundColor(active);
+            label1.setTextColor(active);
         }
-
-        progressBar.setVisibility(View.VISIBLE);
-        tvStatus.setText("Syncing...");
-
-        String userId = auth.getCurrentUser().getUid();
-
-        db.collection("complaints")
-                .whereEqualTo("userId", userId)
-                .get()
-                .addOnSuccessListener(query -> {
-                    progressBar.setVisibility(View.GONE);
-
-                    if (query.isEmpty()) {
-                        tvStatus.setText("No complaints found.");
-                        tvCount.setText("0");
-                        return;
-                    }
-
-                    tvCount.setText(String.valueOf(query.size()));
-                    StringBuilder sb = new StringBuilder();
-
-                    for (QueryDocumentSnapshot doc : query) {
-                        String type = doc.getString("type");
-                        String status = doc.getString("status");
-
-                        // Fallback values if fields are null in Firestore
-                        if (type == null) type = "Unknown Type";
-                        if (status == null) status = "Pending";
-
-                        sb.append("• ").append(type)
-                                .append("\n  Status: ").append(status)
-                                .append("\n\n");
-                    }
-
-                    tvStatus.setText(sb.toString());
-                })
-                .addOnFailureListener(e -> {
-                    progressBar.setVisibility(View.GONE);
-                    tvStatus.setText("Error: " + e.getMessage());
-                    Toast.makeText(this, "Failed to load data", Toast.LENGTH_SHORT).show();
-                });
+        if (status.equalsIgnoreCase("In Progress") || status.equalsIgnoreCase("Solved")) {
+            step2.setBackgroundColor(active);
+            label2.setTextColor(active);
+        }
+        if (status.equalsIgnoreCase("Solved")) {
+            step3.setBackgroundColor(active);
+            label3.setTextColor(active);
+        }
     }
 }

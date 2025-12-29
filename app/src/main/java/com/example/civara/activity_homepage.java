@@ -21,14 +21,17 @@ import com.google.firebase.firestore.ListenerRegistration;
 public class activity_homepage extends AppCompatActivity {
 
     private TextView tvWelcomeName;
-    private ImageButton btnLogout;
+    private ImageButton btnLogout, btnNotification;
+    private View notificationBadge;
     private CardView layoutComplaint, btnSos, btnEvents, btnChatbot;
 
-    // Safety Banner Views
     private CardView sosAlertBanner;
     private Button btnViewSosMap;
     private String activeMapLink = "";
+
+    // Storing listeners to remove them in onDestroy
     private ListenerRegistration sosListener;
+    private ListenerRegistration notificationListener;
 
     private BottomNavigationView bottomNav;
     private FirebaseAuth mAuth;
@@ -47,70 +50,76 @@ public class activity_homepage extends AppCompatActivity {
         // Bind Views
         tvWelcomeName = findViewById(R.id.tvWelcomeName);
         btnLogout = findViewById(R.id.btnLogout);
+        btnNotification = findViewById(R.id.btnNotification);
+        notificationBadge = findViewById(R.id.notificationBadge);
         layoutComplaint = findViewById(R.id.layoutComplaint);
         btnSos = findViewById(R.id.btnSos);
         btnEvents = findViewById(R.id.btnEvents);
         btnChatbot = findViewById(R.id.btnChatbot);
         bottomNav = findViewById(R.id.bottomNavigation);
-
-        // Safety Banner Binding
         sosAlertBanner = findViewById(R.id.sosAlertBanner);
         btnViewSosMap = findViewById(R.id.btnViewSosMap);
 
         if (user != null) {
             loadUserProfile(user.getUid());
+            startListeningForEmergencies();
+            listenForGlobalNotifications(); // New Badge Logic
         } else {
             redirectToLogin();
         }
 
         setupClickListeners();
         setupBottomNavigation();
-        startListeningForEmergencies(); // Start real-time SOS listener
     }
 
     private void loadUserProfile(String uid) {
         db.collection("users").document(uid).get()
-                .addOnSuccessListener(documentSnapshot -> {
-                    if (documentSnapshot.exists()) {
-                        String name = documentSnapshot.getString("name");
+                .addOnSuccessListener(doc -> {
+                    if (doc.exists()) {
+                        String name = doc.getString("name");
                         tvWelcomeName.setText("Hi, " + (name != null ? name : "User") + " 👋");
                     }
                 });
     }
 
     private void startListeningForEmergencies() {
-        // This listener checks the "active_alerts" collection in real-time
         sosListener = db.collection("active_alerts")
                 .addSnapshotListener((value, error) -> {
                     if (error != null) return;
-
                     if (value != null && !value.isEmpty()) {
-                        // Someone has an active SOS! Show banner
                         activeMapLink = value.getDocuments().get(0).getString("mapLink");
                         sosAlertBanner.setVisibility(View.VISIBLE);
                     } else {
-                        // No alerts
                         sosAlertBanner.setVisibility(View.GONE);
                         activeMapLink = "";
                     }
                 });
     }
 
+    private void listenForGlobalNotifications() {
+        // This listener updates the red badge whenever a new document is added to 'notifications'
+        notificationListener = db.collection("notifications")
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) return;
+                    if (value != null && !value.isEmpty()) {
+                        notificationBadge.setVisibility(View.VISIBLE);
+                    } else {
+                        notificationBadge.setVisibility(View.GONE);
+                    }
+                });
+    }
+
     private void setupClickListeners() {
-        layoutComplaint.setOnClickListener(v ->
-                startActivity(new Intent(this, ComplaintDashboardActivity.class)));
+        layoutComplaint.setOnClickListener(v -> startActivity(new Intent(this, ComplaintDashboardActivity.class)));
+        btnEvents.setOnClickListener(v -> startActivity(new Intent(this, EventCalendarActivity.class)));
+        btnSos.setOnClickListener(v -> startActivity(new Intent(this, SosActivity.class)));
+        btnChatbot.setOnClickListener(v -> Toast.makeText(this, "Opening Civara Bot", Toast.LENGTH_SHORT).show());
 
-        btnEvents.setOnClickListener(v ->
-                startActivity(new Intent(this, EventCalendarActivity.class)));
+        btnNotification.setOnClickListener(v -> {
+            notificationBadge.setVisibility(View.GONE); // Clear the badge when clicked
+            startActivity(new Intent(this, NotificationActivity.class));
+        });
 
-        // Fixed SOS: Opens the SosActivity
-        btnSos.setOnClickListener(v ->
-                startActivity(new Intent(this, SosActivity.class)));
-
-        btnChatbot.setOnClickListener(v ->
-                Toast.makeText(this, "Opening Civara Bot", Toast.LENGTH_SHORT).show());
-
-        // Safety Banner Map Button
         btnViewSosMap.setOnClickListener(v -> {
             if (!activeMapLink.isEmpty()) {
                 Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(activeMapLink));
@@ -144,9 +153,7 @@ public class activity_homepage extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        // Stop listening to Firestore to save battery when app is closed
-        if (sosListener != null) {
-            sosListener.remove();
-        }
+        if (sosListener != null) sosListener.remove();
+        if (notificationListener != null) notificationListener.remove();
     }
 }

@@ -63,6 +63,9 @@
         <activity
             android:name=".SosActivity"
             android:exported="false" />
+        <activity
+            android:name=".NotificationActivity"
+            android:exported="false" />
        <!-- <activity
             android:name=".ProfileActivity"
             android:exported="false" />
@@ -92,9 +95,6 @@
             android:exported="false" />
         <activity
             android:name=".EmergencyContactActivity"
-            android:exported="false" />
-        <activity
-            android:name=".NotificationActivity"
             android:exported="false" />
 -->
 
