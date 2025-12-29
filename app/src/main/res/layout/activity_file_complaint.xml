@@ -77,6 +77,35 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Water Supply" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRoad"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Sanitation" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRoad"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Street Lighting" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRoad"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Parks And Publics Places" />
+
+                        <com.google.android.material.chip.Chip
+                            android:id="@+id/chipRoad"
+                            style="@style/Widget.MaterialComponents.Chip.Filter"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Other General Complents" />
+
                     </com.google.android.material.chip.ChipGroup>
 
                     <TextView
