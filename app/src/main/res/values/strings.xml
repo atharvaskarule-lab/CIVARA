@@ -31,6 +31,55 @@
     <string name="action_upload_image">Upload Image</string>
     <string name="action_submit_complaint">Submit Complaint</string>
     <string name="openweather_api_key">57cd72570282820578e222f1d09acc34</string>
+    <string name="welcome_message">Hi, %1$s 👋</string>
+        <!-- ... other strings ... -->
+        <string name="menu_home">Home</string>
+        <string name="menu_weather">Weather</string>
+        <string name="menu_more">More</string>
+    <!-- ... other strings ... -->
+
+    <!-- General -->
+    <string name="login_successful">Login successful</string>
+    <string name="error_unknown">An unknown error occurred</string>
+    <string name="error_generic">Error: %1$s</string>
+
+    <!-- Input Validation Errors -->
+    <string name="error_email_required">Email is required</string>
+    <string name="error_invalid_email">Please enter a valid email address</string>
+    <string name="error_password_required">Password is required</string>
+    
+    <!-- Login Failure Errors -->
+    <string name="error_no_account">No account found with this email.</string>
+    <string name="error_incorrect_password">Incorrect password. Please try again.</string>
+    <string name="error_login_failed">Login failed. Please check your connection and try again.
+    </string>
+
+    <!-- Dialogs and Toasts -->
+    <string name="dialog_title_email_not_verified">Email Not Verified</string>
+    <string name="dialog_message_email_not_verified">Your email address has not been verified.
+        Please check your inbox for a verification link.
+    </string>
+    <string name="dialog_button_resend">Resend Link</string>
+    <string name="dialog_button_ok">OK</string>
+    <string name="toast_verification_email_sent">Verification email sent.</string>
+    <string name="error_failed_to_send_email">Failed to send email.</string>
+    <string name="dialog_title_reset_password">Reset Password</string>
+    <string name="dialog_button_send">Send</string>
+    <string name="dialog_button_cancel">Cancel</string>
+    <string name="toast_password_reset_sent">Password reset link sent. Check your email.</string>
+    <!-- ... any other strings you already have ... -->
+
+    <!-- ✅ FIX: Add these missing strings for the login screen -->
+    <string name="app_name_styled">CIVARA</string>
+    <string name="login_welcome_message">Welcome back! Please login</string>
+    <string name="action_forgot_password">Forgot Password?</string>
+    <string name="prompt_sign_up">Don\'t have an account? Sign Up</string>
+    <string name="desc_email_icon">Email icon</string>
+    <string name="desc_password_icon">Password icon</string>
+    <string name="menu_emergency">Emergency</string>
+
+
+
 
 
         <!-- ... other strings ... -->

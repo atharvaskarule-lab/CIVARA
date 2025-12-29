@@ -1,43 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_500">#6200EE</color>
-    <color name="purple_700">#3700B3</color>
     <color name="black">#000000</color>
     <color name="white">#FFFFFF</color>
-    <!-- Define primary app colors here -->
-    <color name="colorPrimary">#6200EE</color>
-    
-    <!-- You might have other colors here like these, which are standard -->
+    <color name="ic_launcher_background">#FFFFFF</color>
+
     <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#6200EE</color>
+    <color name="purple_700">#3700B3</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
-    <!-- App-specific colors -->
+
+    <color name="primary_blue">#3B82F6</color>
+    <color name="complaint_status_light_blue_bg">#E3F2FD</color>
+    <color name="complaint_status_light_blue_fg">#BBDEFB</color>
+
+    <color name="colorPrimary">#7C3AED</color>
     <color name="app_background">#F4F8FF</color>
     <color name="text_primary">#111827</color>
+    <color name="text_secondary">#64748B</color>
+    <color name="bottom_nav_background">#E5E7EB</color>
+
+    <color name="button_primary">#3B82F6</color>
     <color name="button_secondary">#2563EB</color>
     <color name="button_success">#22C55E</color>
-    <!-- Colors for Complaint Dashboard -->
-    <color name="app_background_light">#F4F8FF</color>
-    <color name="primary_blue">#2563EB</color>
-    <color name="text_primary_dark">#111827</color>
-    <color name="bottom_nav_background">#E5E7EB</color>
-    <color name="button_orange">#F97316</color>
-    <color name="button_green">#22C55E</color>
-    <color name="button_blue">#3B82F6</color>
-    <!-- Colors for Complaint Status Screen -->
+    <color name="button_warning">#F97316</color>
+
     <color name="light_blue_background">#E3F2FD</color>
     <color name="light_blue_foreground">#BBDEFB</color>
-
-    <!-- <color name="purple_500">#FF6200EE</color> -->
-
-    <!-- <color name="purple_700">#FF3700B3</color> -->
-
-    <!-- <color name="black">#FF000000</color> -->
-
-    <!-- Other colors like purple_200, etc. might be here -->
-
-    <!-- ✅ ADD THIS LINE IF IT'S MISSING -->
-    <!-- <color name="black">#FF000000</color> -->
-
-    <!-- <color name="white">#FFFFFFFF</color> -->
 </resources>

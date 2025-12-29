@@ -5,9 +5,8 @@ plugins {
 
 android {
     namespace = "com.example.civara"
-    compileSdk = 36
+    compileSdk = 35 // Changed from 36 to 35 for better stability with current libraries
 
-    // ✅ REQUIRED: Enable BuildConfig generation
     buildFeatures {
         buildConfig = true
     }
@@ -15,17 +14,17 @@ android {
     defaultConfig {
         applicationId = "com.example.civara"
         minSdk = 24
-        targetSdk = 36
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        // ✅ Read API key from local.properties
+        // Ensure this key exists in your local.properties file
         buildConfigField(
             "String",
             "OPENWEATHER_API_KEY",
-            "\"${project.findProperty("OPENWEATHER_API_KEY")}\""
+            "\"${project.findProperty("OPENWEATHER_API_KEY") ?: ""}\""
         )
     }
 
@@ -46,36 +45,33 @@ android {
 }
 
 dependencies {
+    // Firebase BoM manages versions for Firebase AND Google Play Services
+    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+
     // AndroidX & UI
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("com.google.android.material:material:1.9.0")
-    implementation("androidx.activity:activity:1.7.2")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
+    implementation("androidx.appcompat:appcompat:1.7.0")
+    implementation("com.google.android.material:material:1.12.0")
+    implementation("androidx.activity:activity:1.9.3")
+    implementation("androidx.constraintlayout:constraintlayout:2.2.0")
+    implementation("androidx.recyclerview:recyclerview:1.3.2")
+    implementation("androidx.cardview:cardview:1.0.0")
 
-    // Testing
-    testImplementation("junit:junit:4.13.2")
-    androidTestImplementation("androidx.test.ext:junit:1.1.5")
-    androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-
-    // Firebase BOM
-    implementation(platform("com.google.firebase:firebase-bom:34.7.0"))
-
-    // Firebase libraries
+    // Firebase (Versions managed by BoM)
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-database")
     implementation("com.google.firebase:firebase-firestore")
+    implementation("com.google.firebase:firebase-storage")
 
-    // Google Location Services
-    implementation("com.google.android.gms:play-services-location:21.0.1")
+    // Google Play Services
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 
-    // Volley
+    // Third-party
     implementation("com.android.volley:volley:1.2.1")
-
-    // Glide
     implementation("com.github.bumptech.glide:glide:4.16.0")
-    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 
-    // RecyclerView
-    implementation("androidx.recyclerview:recyclerview:1.3.1")
+    // Testing
+    testImplementation("junit:junit:4.13.2")
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }

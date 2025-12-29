@@ -1,0 +1,99 @@
+package com.example.civara;
+
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.util.Base64;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+public class MoreActivity extends AppCompatActivity {
+
+    private ImageView ivProfilePic;
+    private TextView tvProfileName, tvProfileEmail;
+    // Added layoutPrivacy here
+    private LinearLayout layoutAccount, layoutLogout, layoutAbout, layoutPrivacy;
+    private FirebaseAuth mAuth;
+    private FirebaseFirestore db;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+        setContentView(R.layout.activity_more);
+
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+
+        // Bind Views
+        ivProfilePic = findViewById(R.id.ivProfilePic);
+        tvProfileName = findViewById(R.id.tvProfileName);
+        tvProfileEmail = findViewById(R.id.tvProfileEmail);
+        layoutAccount = findViewById(R.id.layoutAccount);
+        layoutAbout = findViewById(R.id.layoutAbout);
+        layoutPrivacy = findViewById(R.id.layoutPrivacy); // Bind Privacy Layout
+        layoutLogout = findViewById(R.id.layoutLogout);
+
+        loadUserData();
+
+        // 1. Account Settings
+        layoutAccount.setOnClickListener(v -> {
+            startActivity(new Intent(MoreActivity.this, AccountActivity.class));
+        });
+
+        // 2. About Us
+        layoutAbout.setOnClickListener(v -> {
+            startActivity(new Intent(MoreActivity.this, AboutUsActivity.class));
+        });
+
+        // 3. Privacy Settings (New)
+        layoutPrivacy.setOnClickListener(v -> {
+            startActivity(new Intent(MoreActivity.this, PrivacyActivity.class));
+        });
+
+        // 4. Logout
+        layoutLogout.setOnClickListener(v -> {
+            mAuth.signOut();
+            Intent intent = new Intent(MoreActivity.this, LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(intent);
+            finish();
+        });
+    }
+
+    private void loadUserData() {
+        if (mAuth.getCurrentUser() == null) return;
+
+        String uid = mAuth.getCurrentUser().getUid();
+        tvProfileEmail.setText(mAuth.getCurrentUser().getEmail());
+
+        db.collection("users").document(uid).addSnapshotListener((doc, error) -> {
+            if (error != null) return;
+            if (doc != null && doc.exists()) {
+                tvProfileName.setText(doc.getString("name"));
+
+                String imageString = doc.getString("profileImageUrl");
+                if (imageString != null && !imageString.isEmpty()) {
+                    // Logic to decode Base64 string
+                    decodeAndSetImage(imageString);
+                }
+            }
+        });
+    }
+
+    private void decodeAndSetImage(String encodedData) {
+        try {
+            byte[] decodedString = Base64.decode(encodedData, Base64.DEFAULT);
+            Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+            ivProfilePic.setImageBitmap(decodedByte);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}

@@ -40,7 +40,7 @@
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".activity_homepage"
+            android:name="HomepageActivity"
             android:exported="false" />
         <activity
             android:name=".ComplaintDashboardActivity"
@@ -66,15 +66,23 @@
         <activity
             android:name=".NotificationActivity"
             android:exported="false" />
+        <activity
+            android:name=".MoreActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AccountActivity"
+            android:exported="false" />
+        <activity
+            android:name=".AboutUsActivity"
+            android:exported="false" />
+        <activity
+            android:name=".PrivacyActivity"
+            android:exported="false" />
        <!-- <activity
             android:name=".ProfileActivity"
             android:exported="false" />
-        <activity
-            android:name=".SettingsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AboutActivity"
-            android:exported="false" />
+
+
         <activity
             android:name=".FeedbackActivity"
             android:exported="false" />
