@@ -25,18 +25,17 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:fontFamily="sans-serif-black"
                 android:text="CIVARA"
                 android:textColor="#7C3AED"
                 android:textSize="32sp"
-                android:letterSpacing="0.1" />
+                android:textStyle="bold" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginBottom="32dp"
-                android:text="Welcome back! Please login."
+                android:text="Welcome back! Please login"
                 android:textColor="#64748B"
                 android:textSize="14sp" />
 
@@ -46,20 +45,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxStrokeColor="#7C3AED"
-                app:startIconDrawable="@android:drawable/ic_dialog_email"
-                app:startIconTint="#64748B">
+                app:startIconDrawable="@android:drawable/ic_dialog_email">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etLoginEmail"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textEmailAddress"
-                    android:textColor="#1E293B" />
+                    android:inputType="textEmailAddress" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -69,21 +61,14 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:hint="Password"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxStrokeColor="#7C3AED"
                 app:passwordToggleEnabled="true"
-                app:startIconDrawable="@android:drawable/ic_lock_idle_lock"
-                app:startIconTint="#64748B">
+                app:startIconDrawable="@android:drawable/ic_lock_idle_lock">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/etLoginPassword"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="textPassword"
-                    android:textColor="#1E293B" />
+                    android:inputType="textPassword" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
@@ -92,23 +77,21 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="end"
                 android:layout_marginTop="8dp"
-                android:padding="8dp"
                 android:text="Forgot Password?"
                 android:textColor="#7C3AED"
-                android:textSize="13sp"
                 android:textStyle="bold" />
 
-            <Button
+            <TextView
                 android:id="@+id/btnLogin"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="24dp"
-                android:backgroundTint="#7C3AED"
+                android:background="@drawable/bg_login_button"
+                android:gravity="center"
                 android:text="Login"
-                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
                 android:textSize="18sp"
-                android:textStyle="bold"
-                app:cornerRadius="12dp" />
+                android:textStyle="bold" />
 
             <ProgressBar
                 android:id="@+id/loginProgressBar"
@@ -116,7 +99,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
-                android:indeterminateTint="#7C3AED"
                 android:visibility="gone" />
 
             <TextView
@@ -125,7 +107,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="24dp"
-                android:padding="8dp"
                 android:text="Don't have an account? Sign Up"
                 android:textColor="#7C3AED"
                 android:textStyle="bold" />

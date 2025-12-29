@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -22,17 +21,28 @@ public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword;
     private TextInputLayout tilEmail, tilPassword;
-    private Button btnLogin;
-    private TextView tvSignupLink, tvForgotPassword;
+    private TextView btnLogin, tvSignupLink, tvForgotPassword;
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // 🔹 Firebase instance
+        mAuth = FirebaseAuth.getInstance();
+
+        // 🔹 AUTO LOGIN CHECK
+        FirebaseUser user = mAuth.getCurrentUser();
+        if (user != null) {
+            startActivity(new Intent(LoginActivity.this, activity_homepage.class));
+            finish();
+            return;
+        }
+
         setContentView(R.layout.activity_login);
 
-        // UI initialization - matching the Light Theme XML
+        // 🔹 Init UI
         etEmail = findViewById(R.id.etLoginEmail);
         etPassword = findViewById(R.id.etLoginPassword);
         tilEmail = findViewById(R.id.tilLoginEmail);
@@ -42,24 +52,31 @@ public class LoginActivity extends AppCompatActivity {
         tvForgotPassword = findViewById(R.id.tvForgotPassword);
         progressBar = findViewById(R.id.loginProgressBar);
 
-        mAuth = FirebaseAuth.getInstance();
-
-        // Button Clicks
         btnLogin.setOnClickListener(v -> loginUser());
+
         tvSignupLink.setOnClickListener(v -> {
             startActivity(new Intent(this, SignupActivity.class));
             finish();
         });
+
         tvForgotPassword.setOnClickListener(v -> showForgotPasswordDialog());
     }
 
     private void loginUser() {
-        if (etEmail.getText() == null || etPassword.getText() == null) return;
-
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
 
-        if (!validateInput(email, password)) return;
+        tilEmail.setError(null);
+        tilPassword.setError(null);
+
+        if (TextUtils.isEmpty(email)) {
+            tilEmail.setError("Email required");
+            return;
+        }
+        if (TextUtils.isEmpty(password)) {
+            tilPassword.setError("Password required");
+            return;
+        }
 
         progressBar.setVisibility(View.VISIBLE);
         btnLogin.setEnabled(false);
@@ -70,50 +87,35 @@ public class LoginActivity extends AppCompatActivity {
                     btnLogin.setEnabled(true);
 
                     if (task.isSuccessful()) {
-                        FirebaseUser user = mAuth.getCurrentUser();
-                        Toast.makeText(this, "Welcome to Civara!", Toast.LENGTH_SHORT).show();
-
-                        Intent intent = new Intent(this, activity_homepage.class);
-                        intent.putExtra("userId", user.getUid());
-                        startActivity(intent);
+                        Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(this, activity_homepage.class));
                         finish();
                     } else {
-                        String error = task.getException() != null ? task.getException().getMessage() : "Login failed";
-                        Toast.makeText(this, error, Toast.LENGTH_LONG).show();
+                        Toast.makeText(this,
+                                task.getException() != null ?
+                                        task.getException().getMessage() :
+                                        "Login failed",
+                                Toast.LENGTH_LONG).show();
                     }
                 });
     }
 
-    private boolean validateInput(String email, String password) {
-        tilEmail.setError(null);
-        tilPassword.setError(null);
-
-        if (TextUtils.isEmpty(email)) {
-            tilEmail.setError("Email is required");
-            return false;
-        }
-        if (TextUtils.isEmpty(password)) {
-            tilPassword.setError("Password is required");
-            return false;
-        }
-        return true;
-    }
-
     private void showForgotPasswordDialog() {
-        final EditText input = new EditText(this);
-        input.setHint("Enter your email");
-        input.setPadding(60, 40, 60, 40);
+        EditText input = new EditText(this);
+        input.setHint("Enter registered email");
 
         new AlertDialog.Builder(this)
                 .setTitle("Reset Password")
-                .setMessage("A recovery link will be sent to your email.")
+                .setMessage("A password reset link will be sent to your email")
                 .setView(input)
                 .setPositiveButton("Send", (dialog, which) -> {
                     String email = input.getText().toString().trim();
                     if (!TextUtils.isEmpty(email)) {
                         mAuth.sendPasswordResetEmail(email)
-                                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Check your email!", Toast.LENGTH_SHORT).show())
-                                .addOnFailureListener(e -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+                                .addOnSuccessListener(aVoid ->
+                                        Toast.makeText(this, "Check your email", Toast.LENGTH_SHORT).show())
+                                .addOnFailureListener(e ->
+                                        Toast.makeText(this, e.getMessage(), Toast.LENGTH_SHORT).show());
                     }
                 })
                 .setNegativeButton("Cancel", null)
