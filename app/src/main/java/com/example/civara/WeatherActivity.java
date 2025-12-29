@@ -3,6 +3,7 @@ package com.example.civara;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
@@ -37,11 +38,10 @@ import java.util.Locale;
 public class WeatherActivity extends AppCompatActivity {
 
     private static final int LOCATION_PERMISSION_CODE = 100;
+    private static final String TAG = "WeatherActivity";
     private String API_KEY;
 
     private TextView tvCity, tvDate, tvTemperature, tvDescription, tvHumidity, tvWind, tvFeelsLike, tvMaxTemp, tvMinTemp;
-    private ImageView ivWeatherIcon, btnRefresh;
-    private RecyclerView rvForecast;
     private RelativeLayout loadingLayout;
     private FusedLocationProviderClient fusedLocationClient;
 
@@ -71,9 +71,8 @@ public class WeatherActivity extends AppCompatActivity {
         tvFeelsLike = findViewById(R.id.tvFeelsLike);
         tvMaxTemp = findViewById(R.id.tvMaxTemp);
         tvMinTemp = findViewById(R.id.tvMinTemp);
-        ivWeatherIcon = findViewById(R.id.ivWeatherIcon);
-        btnRefresh = findViewById(R.id.btnRefresh);
-        rvForecast = findViewById(R.id.rvForecast);
+        ImageView btnRefresh = findViewById(R.id.btnRefresh);
+        RecyclerView rvForecast = findViewById(R.id.rvForecast);
         loadingLayout = findViewById(R.id.loadingLayout);
 
         // Set current date
@@ -164,41 +163,33 @@ public class WeatherActivity extends AppCompatActivity {
                         JSONArray weatherArray = response.getJSONArray("weather");
                         JSONObject weather = weatherArray.getJSONObject(0);
                         String description = weather.getString("description");
-                        String icon = weather.getString("icon");
 
                         // Get country if available
-                        String location = cityName;
+                        String locationString = cityName;
                         if (response.has("sys")) {
                             JSONObject sys = response.getJSONObject("sys");
                             String country = sys.optString("country", "");
                             if (!country.isEmpty()) {
-                                location = cityName + ", " + country;
+                                locationString = cityName + ", " + country;
                             }
                         }
 
                         // Update UI with smooth animations
-                        tvCity.setText(cityName);
+                        tvCity.setText(locationString);
                         tvTemperature.setText(String.format(Locale.getDefault(), "%.0f°", temp));
                         tvDescription.setText(capitalizeWords(description));
-                        tvHumidity.setText(humidity + "%");
+                        tvHumidity.setText(String.format(Locale.getDefault(), "%d%%", humidity));
                         tvWind.setText(String.format(Locale.getDefault(), "%.0f m/s", windSpeed));
                         tvFeelsLike.setText(String.format(Locale.getDefault(), "%.0f°", feelsLike));
                         tvMaxTemp.setText(String.format(Locale.getDefault(), "%.0f°", tempMax));
                         tvMinTemp.setText(String.format(Locale.getDefault(), "%.0f°", tempMin));
-
-                        // Load weather icon with higher resolution
-                        String iconUrl = "https://openweathermap.org/img/wn/" + icon + "@4x.png";
-                        Glide.with(this)
-                                .load(iconUrl)
-                                .placeholder(android.R.drawable.ic_menu_gallery)
-                                .into(ivWeatherIcon);
 
                         // Animate views
                         animateViews();
 
                     } catch (JSONException e) {
                         Toast.makeText(this, "Error parsing weather data", Toast.LENGTH_SHORT).show();
-                        e.printStackTrace();
+                        Log.e(TAG, "Error parsing weather data", e);
                     }
                 },
                 error -> {
@@ -251,7 +242,7 @@ public class WeatherActivity extends AppCompatActivity {
 
                     } catch (JSONException e) {
                         Toast.makeText(this, "Error parsing forecast data", Toast.LENGTH_SHORT).show();
-                        e.printStackTrace();
+                        Log.e(TAG, "Error parsing forecast data", e);
                     }
                 },
                 error -> {
@@ -269,11 +260,9 @@ public class WeatherActivity extends AppCompatActivity {
         // Fade in animation for main content
         tvTemperature.setAlpha(0f);
         tvDescription.setAlpha(0f);
-        ivWeatherIcon.setAlpha(0f);
 
         tvTemperature.animate().alpha(1f).setDuration(600).start();
         tvDescription.animate().alpha(1f).setDuration(600).setStartDelay(100).start();
-        ivWeatherIcon.animate().alpha(1f).setDuration(600).setStartDelay(200).start();
     }
 
     private String capitalizeWords(String text) {
@@ -283,7 +272,7 @@ public class WeatherActivity extends AppCompatActivity {
         StringBuilder result = new StringBuilder();
 
         for (String word : words) {
-            if (word.length() > 0) {
+            if (!word.isEmpty()) {
                 result.append(Character.toUpperCase(word.charAt(0)))
                         .append(word.substring(1).toLowerCase())
                         .append(" ");
