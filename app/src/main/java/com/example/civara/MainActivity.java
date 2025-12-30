@@ -14,11 +14,13 @@ public class MainActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     Button btnLogout;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         mAuth = FirebaseAuth.getInstance();
+        ThemeHelper.loadTheme(this);
 
         // 🔐 Check if user is logged in
         FirebaseUser user = mAuth.getCurrentUser();
