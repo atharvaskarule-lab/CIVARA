@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8FAFC"
+    android:background="?android:attr/windowBackground"
     android:orientation="vertical">
 
     <TextView
@@ -124,6 +124,25 @@
                         <TextView
                             style="@style/MoreMenuText"
                             android:text="Change Language" />
+                    </LinearLayout>
+
+                    <View style="@style/MoreMenuDivider" />
+
+                    <LinearLayout
+                        android:id="@+id/layoutTheme"
+                        style="@style/MoreMenuItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_day"
+                            app:tint="#7C3AED" />
+
+                        <TextView
+                            style="@style/MoreMenuText"
+                            android:text="Appearance / Theme" />
                     </LinearLayout>
 
                     <View style="@style/MoreMenuDivider" />

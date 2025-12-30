@@ -18,7 +18,7 @@ public class MoreActivity extends AppCompatActivity {
     private ImageView ivProfilePic;
     private TextView tvProfileName, tvProfileEmail;
     // Added layoutPrivacy here
-    private LinearLayout layoutAccount, layoutLogout, layoutAbout,layoutPrivacy,layoutLanguage;
+    private LinearLayout layoutAccount, layoutLogout, layoutAbout,layoutPrivacy,layoutLanguage,layoutTheme;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -40,6 +40,7 @@ public class MoreActivity extends AppCompatActivity {
         layoutAccount = findViewById(R.id.layoutAccount);
         layoutAbout = findViewById(R.id.layoutAbout);
         layoutLanguage = findViewById(R.id.layoutLanguage); // Bind Language Layout
+        layoutTheme = findViewById(R.id.layoutTheme);
         layoutPrivacy = findViewById(R.id.layoutPrivacy); // Bind Privacy Layout
         layoutLogout = findViewById(R.id.layoutLogout);
 
@@ -58,6 +59,10 @@ public class MoreActivity extends AppCompatActivity {
         layoutLanguage.setOnClickListener(v -> {
             showLanguageDialog();
         });
+        // Click Listener
+        layoutTheme.setOnClickListener(v -> {
+            showThemeDialog();
+        });
 
         // 3. Privacy Settings (New)
         layoutPrivacy.setOnClickListener(v -> {
@@ -72,6 +77,8 @@ public class MoreActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+
+
     }
     private void showLanguageDialog() {
         String[] languages = {"English", "मराठी (Marathi)", "हिन्दी (Hindi)"};
@@ -90,6 +97,25 @@ public class MoreActivity extends AppCompatActivity {
                     setLocale("hi");
                     break;
             }
+        });
+        builder.show();
+    }
+    private void showThemeDialog() {
+        String[] themes = {"Light Mode", "Dark Mode", "System Default"};
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Choose Theme");
+        builder.setItems(themes, (dialog, which) -> {
+            int mode;
+            if (which == 0) mode = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO;
+            else if (which == 1) mode = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES;
+            else mode = androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+
+            // Theme save ani apply kara
+            ThemeHelper.applyTheme(this, mode);
+
+            // Activity refresh kara
+            recreate();
         });
         builder.show();
     }
