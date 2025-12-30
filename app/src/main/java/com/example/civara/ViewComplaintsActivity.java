@@ -29,7 +29,10 @@ public class ViewComplaintsActivity extends AppCompatActivity {
 
         fullList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        }
 
         setupRecyclerView();
 
@@ -39,7 +42,9 @@ public class ViewComplaintsActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                adapter.getFilter().filter(newText);
+                if (adapter != null) {
+                    adapter.getFilter().filter(newText);
+                }
                 return true;
             }
         });
@@ -49,9 +54,8 @@ public class ViewComplaintsActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         adapter = new ComplaintAdapter(fullList, complaint -> {
-            // Detailed View Option: Open Status page with details
             Intent intent = new Intent(this, ComplaintStatusActivity.class);
-            intent.putExtra("complaintId", complaint.getId());
+            intent.putExtra("complaintId", complaint.getDocumentId());
             startActivity(intent);
         });
         rvComplaints.setLayoutManager(new LinearLayoutManager(this));
@@ -66,9 +70,9 @@ public class ViewComplaintsActivity extends AppCompatActivity {
                     fullList.clear();
                     query.forEach(doc -> {
                         Complaint c = doc.toObject(Complaint.class);
-                        // Ensure you store the document ID
-                        fullList.add(new Complaint(doc.getId(), c.getType(),
-                                c.getDescription(), c.getStatus(), c.getDate()));
+                        // Assigning the Firestore Document ID to the object
+                        c.setDocumentId(doc.getId());
+                        fullList.add(c);
                     });
                     adapter.updateList(fullList);
                 });

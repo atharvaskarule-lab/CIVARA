@@ -78,6 +78,20 @@
         <activity
             android:name=".PrivacyActivity"
             android:exported="false" />
+        <activity
+            android:name=".AdminDashboardActivity"
+            android:exported="false" />
+
+        <activity android:name=".ManageComplaintsActivity"
+            android:exported="false"
+            android:label="Manage Complaints" />
+        <activity android:name=".AddEventActivity"
+            android:exported="false"
+            android:label="Manage Events" />
+        <activity android:name=".Complaint"
+            android:exported="false" />
+
+
        <!-- <activity
             android:name=".ProfileActivity"
             android:exported="false" />
