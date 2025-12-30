@@ -110,6 +110,25 @@
                     <View style="@style/MoreMenuDivider" />
 
                     <LinearLayout
+                        android:id="@+id/layoutLanguage"
+                        style="@style/MoreMenuItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_sort_alphabetically"
+                            app:tint="#7C3AED" />
+
+                        <TextView
+                            style="@style/MoreMenuText"
+                            android:text="Change Language" />
+                    </LinearLayout>
+
+                    <View style="@style/MoreMenuDivider" />
+
+                    <LinearLayout
                         android:id="@+id/layoutPrivacy"
                         style="@style/MoreMenuItem"
                         android:layout_width="match_parent"

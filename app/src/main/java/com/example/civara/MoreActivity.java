@@ -18,9 +18,10 @@ public class MoreActivity extends AppCompatActivity {
     private ImageView ivProfilePic;
     private TextView tvProfileName, tvProfileEmail;
     // Added layoutPrivacy here
-    private LinearLayout layoutAccount, layoutLogout, layoutAbout, layoutPrivacy;
+    private LinearLayout layoutAccount, layoutLogout, layoutAbout,layoutPrivacy,layoutLanguage;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,11 +33,13 @@ public class MoreActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
 
         // Bind Views
+
         ivProfilePic = findViewById(R.id.ivProfilePic);
         tvProfileName = findViewById(R.id.tvProfileName);
         tvProfileEmail = findViewById(R.id.tvProfileEmail);
         layoutAccount = findViewById(R.id.layoutAccount);
         layoutAbout = findViewById(R.id.layoutAbout);
+        layoutLanguage = findViewById(R.id.layoutLanguage); // Bind Language Layout
         layoutPrivacy = findViewById(R.id.layoutPrivacy); // Bind Privacy Layout
         layoutLogout = findViewById(R.id.layoutLogout);
 
@@ -52,6 +55,10 @@ public class MoreActivity extends AppCompatActivity {
             startActivity(new Intent(MoreActivity.this, AboutUsActivity.class));
         });
 
+        layoutLanguage.setOnClickListener(v -> {
+            showLanguageDialog();
+        });
+
         // 3. Privacy Settings (New)
         layoutPrivacy.setOnClickListener(v -> {
             startActivity(new Intent(MoreActivity.this, PrivacyActivity.class));
@@ -65,6 +72,40 @@ public class MoreActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         });
+    }
+    private void showLanguageDialog() {
+        String[] languages = {"English", "मराठी (Marathi)", "हिन्दी (Hindi)"};
+
+        androidx.appcompat.app.AlertDialog.Builder builder = new androidx.appcompat.app.AlertDialog.Builder(this);
+        builder.setTitle("Select Language");
+        builder.setItems(languages, (dialog, which) -> {
+            switch (which) {
+                case 0: // English
+                    setLocale("en");
+                    break;
+                case 1: // Marathi
+                    setLocale("mr");
+                    break;
+                case 2: // Hindi
+                    setLocale("hi");
+                    break;
+            }
+        });
+        builder.show();
+    }
+
+    private void setLocale(String langCode) {
+        java.util.Locale locale = new java.util.Locale(langCode);
+        java.util.Locale.setDefault(locale);
+        android.content.res.Configuration config = new android.content.res.Configuration();
+        config.setLocale(locale);
+
+        getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+
+        // Restart activity to apply changes
+        Intent intent = new Intent(this, MoreActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(intent);
     }
 
     private void loadUserData() {
