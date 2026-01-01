@@ -23,6 +23,8 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputEditText etEmail, etPassword;
@@ -32,20 +34,26 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressBar progressBar;
     private FirebaseAuth mAuth;
 
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAuth = FirebaseAuth.getInstance();
 
-        FirebaseUser currentUser = mAuth.getCurrentUser();
-        if (currentUser != null && currentUser.isEmailVerified()) {
-            redirectToHomepage();
-            return;
-        }
-
+        // 1. MUST set content view first so findViewById works
         setContentView(R.layout.activity_login);
+
+        // 2. Initialize your views (ProgressBar, etc.)
         initViews();
         setupClickListeners();
+
+        mAuth = FirebaseAuth.getInstance();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+
+        // 3. Now check for the user
+        if (currentUser != null && currentUser.isEmailVerified()) {
+            checkUserRoleAndRedirect(currentUser.getUid());
+        }
     }
 
     private void initViews() {
@@ -80,12 +88,12 @@ public class LoginActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null && user.isEmailVerified()) {
-                            Toast.makeText(this, "Login successful", Toast.LENGTH_SHORT).show();
-                            redirectToHomepage();
+                            // Instead of redirectToHomepage(), call the role check
+                            checkUserRoleAndRedirect(user.getUid());
                         } else {
                             showEmailVerificationDialog(user);
                         }
-                    } else {
+                    }else {
                         handleLoginFailure(task);
                     }
                 });
@@ -169,17 +177,43 @@ public class LoginActivity extends AppCompatActivity {
                 .show();
     }
 
-    private void redirectToHomepage() {
-        Intent intent = new Intent(this, HomepageActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finish();
-    }
+    private void checkUserRoleAndRedirect(String uid) {
+        setLoading(true);
+        FirebaseFirestore.getInstance().collection("users").document(uid).get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    setLoading(false);
+                    if (documentSnapshot.exists()) {
+                        String role = documentSnapshot.getString("role");
 
+                        if ("admin".equals(role)) {
+                            Intent intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finish();
+                        } else {
+                            // DEBUG TOAST: Tell us what the role actually is
+                            Toast.makeText(this, "Logged in as: " + (role == null ? "No Role Found" : role), Toast.LENGTH_LONG).show();
+
+                            Intent intent = new Intent(LoginActivity.this, HomepageActivity.class);
+                            startActivity(intent);
+                            finish();
+                        }
+                    } else {
+                        Toast.makeText(this, "Firestore document missing for this UID!", Toast.LENGTH_LONG).show();
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    setLoading(false);
+                    Toast.makeText(this, "Firestore Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
     private void setLoading(boolean loading) {
-        progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
-        btnLogin.setEnabled(!loading);
-        tvSignupLink.setEnabled(!loading);
-        tvForgotPassword.setEnabled(!loading);
+        // Check if views are null before accessing them
+        if (progressBar != null) {
+            progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+        }
+        if (btnLogin != null) btnLogin.setEnabled(!loading);
+        if (tvSignupLink != null) tvSignupLink.setEnabled(!loading);
+        if (tvForgotPassword != null) tvForgotPassword.setEnabled(!loading);
     }
 }
