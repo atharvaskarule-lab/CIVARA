@@ -2,14 +2,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <!-- ✅ ADDED: ACCESS_COARSE_LOCATION for better compatibility and user choice -->
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.SEND_SMS" />
 
+    <uses-permission android:name="android.permission.SEND_SMS" />
+    <uses-feature android:name="android.hardware.telephony" android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -22,7 +21,6 @@
         android:theme="@style/Theme.CIVARA"
         tools:targetApi="31">
 
-        <!-- LOGIN Activity (Launcher) -->
         <activity
             android:name=".LoginActivity"
             android:exported="true">
@@ -32,95 +30,24 @@
             </intent-filter>
         </activity>
 
-        <!-- OTHER ACTIVITIES -->
-        <activity
-            android:name=".SignupActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
-        <activity
-            android:name="HomepageActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ComplaintDashboardActivity"
-            android:exported="false" />
-        <activity
-            android:name=".FileComplaintActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ComplaintStatusActivity"
-            android:exported="false" />
-        <activity
-            android:name=".WeatherActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ViewComplaintsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EventCalendarActivity"
-            android:exported="false" />
-        <activity
-            android:name=".SosActivity"
-            android:exported="false" />
-        <activity
-            android:name=".NotificationActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MoreActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AccountActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AboutUsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PrivacyActivity"
-            android:exported="false" />
-        <activity
-            android:name=".AdminDashboardActivity"
-            android:exported="false" />
-
-        <activity android:name=".ManageComplaintsActivity"
-            android:exported="false"
-            android:label="Manage Complaints" />
-        <activity android:name=".AddEventActivity"
-            android:exported="false"
-            android:label="Manage Events" />
-        <activity android:name=".Complaint"
-            android:exported="false" />
-
-
-       <!-- <activity
-            android:name=".ProfileActivity"
-            android:exported="false" />
-
-
-        <activity
-            android:name=".FeedbackActivity"
-            android:exported="false" />
-        <activity
-            android:name=".HelpActivity"
-            android:exported="false" />
-        <activity
-            android:name=".TermsActivity"
-            android:exported="false" />
-        <activity
-            android:name=".PrivacyActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ChangePasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".ForgotPasswordActivity"
-            android:exported="false" />
-        <activity
-            android:name=".EmergencyContactActivity"
-            android:exported="false" />
--->
-
+        <activity android:name=".SignupActivity" android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false" />
+        <activity android:name=".HomepageActivity" android:exported="false" />
+        <activity android:name=".ComplaintDashboardActivity" android:exported="false" />
+        <activity android:name=".FileComplaintActivity" android:exported="false" />
+        <activity android:name=".ComplaintStatusActivity" android:exported="false" />
+        <activity android:name=".WeatherActivity" android:exported="false" />
+        <activity android:name=".ViewComplaintsActivity" android:exported="false" />
+        <activity android:name=".EventCalendarActivity" android:exported="false" />
+        <activity android:name=".SosActivity" android:exported="false" />
+        <activity android:name=".NotificationActivity" android:exported="false" />
+        <activity android:name=".MoreActivity" android:exported="false" />
+        <activity android:name=".AccountActivity" android:exported="false" />
+        <activity android:name=".AboutUsActivity" android:exported="false" />
+        <activity android:name=".PrivacyActivity" android:exported="false" />
+        <activity android:name=".AdminDashboardActivity" android:exported="false" />
+        <activity android:name=".ManageComplaintsActivity" android:exported="false" />
+        <activity android:name=".AddEventActivity" android:exported="false" />
 
     </application>
-
 </manifest>

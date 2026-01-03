@@ -79,32 +79,32 @@
                             android:text="Water Supply" />
 
                         <com.google.android.material.chip.Chip
-                            android:id="@+id/chipRoad"
+                            android:id="@+id/chipSanitation"
                             style="@style/Widget.MaterialComponents.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Sanitation" />
 
                         <com.google.android.material.chip.Chip
-                            android:id="@+id/chipRoad"
+                            android:id="@+id/chipStreet"
                             style="@style/Widget.MaterialComponents.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Street Lighting" />
 
                         <com.google.android.material.chip.Chip
-                            android:id="@+id/chipRoad"
+                            android:id="@+id/chipPark"
                             style="@style/Widget.MaterialComponents.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Parks And Publics Places" />
+                            android:text="Parks And Public's Places" />
 
                         <com.google.android.material.chip.Chip
-                            android:id="@+id/chipRoad"
+                            android:id="@+id/chipOtherGeneral"
                             style="@style/Widget.MaterialComponents.Chip.Filter"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Other General Complents" />
+                            android:text="Other General Complaints" />
 
                     </com.google.android.material.chip.ChipGroup>
 
