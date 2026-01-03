@@ -6,34 +6,40 @@ public class Complaint {
     private String description;
     private String status;
     private String date;
-    private String userId;
-    private long timestamp;
+    private String name;
+    private String imageUrl; // ADDED: To store the Base64 image string
+    private double latitude;  // ADDED: For location support
+    private double longitude; // ADDED: For location support
 
-    // Required empty constructor for Firebase
-    public Complaint() {}
+    public Complaint() {} // Required for Firestore
 
-    // Constructor for manual creation
-    public Complaint(String documentId, String title, String description, String status, String date) {
-        this.documentId = documentId;
-        this.title = title;
-        this.description = description;
-        this.status = status;
-        this.date = date;
-    }
+    // GETTERS AND SETTERS FOR IMAGES (Fixes the Adapter Error)
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    // Getters and Setters
-    public String getDocumentId() { return documentId; }
-    public void setDocumentId(String documentId) { this.documentId = documentId; }
+    // GETTERS AND SETTERS FOR LOCATION
+    public double getLatitude() { return latitude; }
+    public void setLatitude(double latitude) { this.latitude = latitude; }
+
+    public double getLongitude() { return longitude; }
+    public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    // EXISTING GETTERS AND SETTERS
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
+
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
-    public String getUserId() { return userId; }
-    public void setUserId(String userId) { this.userId = userId; }
-    public long getTimestamp() { return timestamp; }
-    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+    public String getDocumentId() { return documentId; }
+    public void setDocumentId(String documentId) { this.documentId = documentId; }
 }

@@ -27,7 +27,8 @@
                 android:layout_height="wrap_content"
                 android:layout_alignParentStart="true"
                 android:layout_toStartOf="@+id/tvComplaintStatus"
-                android:text="Water Leakage"
+                android:layout_marginEnd="8dp"
+                android:text="Title"
                 android:textColor="#1E293B"
                 android:textSize="18sp"
                 android:textStyle="bold" />
@@ -50,9 +51,19 @@
             android:layout_marginTop="8dp"
             android:ellipsize="end"
             android:maxLines="3"
-            android:text="The main pipe on 4th street is leaking since morning."
+            android:text="Description goes here..."
             android:textColor="#64748B"
             android:textSize="14sp" />
+
+        <com.google.android.material.imageview.ShapeableImageView
+            android:id="@+id/ivComplaintImage"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:layout_marginTop="12dp"
+            android:adjustViewBounds="true"
+            android:scaleType="centerCrop"
+            android:visibility="gone"
+            app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium" />
 
         <View
             android:layout_width="match_parent"
@@ -60,14 +71,33 @@
             android:layout_marginVertical="12dp"
             android:background="#F1F5F9" />
 
-        <TextView
-            android:id="@+id/tvComplaintDate"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawablePadding="6dp"
-            android:text="Submitted: Jan 01, 2026"
-            android:textColor="#94A3B8"
-            android:textSize="12sp" />
+            android:orientation="horizontal"
+            android:weightSum="2">
+
+            <TextView
+                android:id="@+id/tvComplaintDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Submitted: Jan 01, 2026"
+                android:textColor="#94A3B8"
+                android:textSize="11sp" />
+
+            <TextView
+                android:id="@+id/tvSubmittedBy"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="By: User Name"
+                android:textColor="#64748B"
+                android:textSize="11sp"
+                android:textStyle="italic" />
+
+        </LinearLayout>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
