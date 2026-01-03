@@ -1,5 +1,6 @@
 package com.example.civara;
 
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,7 @@ import java.util.List;
 public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.ViewHolder> implements Filterable {
 
     private List<Complaint> complaintList;
-    private List<Complaint> complaintListFull; // For filtering
+    private List<Complaint> complaintListFull;
     private OnComplaintClickListener listener;
 
     public interface OnComplaintClickListener {
@@ -28,7 +29,7 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
     }
 
     public void updateList(List<Complaint> newList) {
-        this.complaintList = newList;
+        this.complaintList = new ArrayList<>(newList);
         this.complaintListFull = new ArrayList<>(newList);
         notifyDataSetChanged();
     }
@@ -43,19 +44,39 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Complaint c = complaintList.get(position);
+
         holder.tvTitle.setText(c.getTitle());
         holder.tvDesc.setText(c.getDescription());
-        holder.tvStatus.setText("Status: " + c.getStatus());
-        holder.itemView.setOnClickListener(v -> listener.onComplaintClick(c));
+        holder.tvStatus.setText(c.getStatus() != null ? c.getStatus() : "Pending");
+        holder.tvDate.setText("Submitted: " + (c.getDate() != null ? c.getDate() : "N/A"));
+
+        // Modern Color Coding for Admin
+        String status = c.getStatus() != null ? c.getStatus() : "Pending";
+        switch (status) {
+            case "Resolved":
+                holder.tvStatus.setTextColor(Color.parseColor("#16A34A")); // Success Green
+                break;
+            case "In Progress":
+                holder.tvStatus.setTextColor(Color.parseColor("#2563EB")); // Primary Blue
+                break;
+            case "Rejected":
+                holder.tvStatus.setTextColor(Color.parseColor("#DC2626")); // Error Red
+                break;
+            default: // Pending
+                holder.tvStatus.setTextColor(Color.parseColor("#EA580C")); // Warning Orange
+                break;
+        }
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onComplaintClick(c);
+        });
     }
 
     @Override
     public int getItemCount() { return complaintList.size(); }
 
     @Override
-    public Filter getFilter() {
-        return complaintFilter;
-    }
+    public Filter getFilter() { return complaintFilter; }
 
     private Filter complaintFilter = new Filter() {
         @Override
@@ -64,16 +85,16 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
             if (constraint == null || constraint.length() == 0) {
                 filteredList.addAll(complaintListFull);
             } else {
-                String filterPattern = constraint.toString().toLowerCase().trim();
+                String pattern = constraint.toString().toLowerCase().trim();
                 for (Complaint item : complaintListFull) {
-                    if (item.getTitle().toLowerCase().contains(filterPattern)) {
+                    if (item.getTitle().toLowerCase().contains(pattern)) {
                         filteredList.add(item);
                     }
                 }
             }
-            FilterResults results = new FilterResults();
-            results.values = filteredList;
-            return results;
+            FilterResults res = new FilterResults();
+            res.values = filteredList;
+            return res;
         }
 
         @Override
@@ -85,12 +106,13 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
     };
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvDesc, tvStatus;
+        TextView tvTitle, tvDesc, tvStatus, tvDate;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvTitle = itemView.findViewById(R.id.tvComplaintTitle);
             tvDesc = itemView.findViewById(R.id.tvComplaintDesc);
             tvStatus = itemView.findViewById(R.id.tvComplaintStatus);
+            tvDate = itemView.findViewById(R.id.tvComplaintDate);
         }
     }
 }

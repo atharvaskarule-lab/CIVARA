@@ -72,6 +72,7 @@ dependencies {
 
     implementation("com.google.firebase:firebase-firestore:24.10.0")
 
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     // Testing
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
