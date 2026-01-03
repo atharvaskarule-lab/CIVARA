@@ -167,6 +167,23 @@
                     <View style="@style/MoreMenuDivider" />
 
                     <LinearLayout
+                        android:id="@+id/layoutHelpFeedback"
+                        style="@style/MoreMenuItem"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            app:tint="#7C3AED" />
+
+                        <TextView
+                            style="@style/MoreMenuText"
+                            android:text="Help &amp; Feedback" />
+                    </LinearLayout>
+
+                    <LinearLayout
                         android:id="@+id/layoutAbout"
                         style="@style/MoreMenuItem"
                         android:layout_width="match_parent"

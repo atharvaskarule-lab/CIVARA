@@ -18,7 +18,7 @@ public class MoreActivity extends AppCompatActivity {
     private ImageView ivProfilePic;
     private TextView tvProfileName, tvProfileEmail;
     // Added layoutPrivacy here
-    private LinearLayout layoutAccount, layoutLogout, layoutAbout,layoutPrivacy,layoutLanguage,layoutTheme;
+    private LinearLayout layoutAccount, layoutLogout, layoutAbout,layoutPrivacy,layoutLanguage,layoutTheme,layoutHelpFeedback;
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -43,6 +43,7 @@ public class MoreActivity extends AppCompatActivity {
         layoutTheme = findViewById(R.id.layoutTheme);
         layoutPrivacy = findViewById(R.id.layoutPrivacy); // Bind Privacy Layout
         layoutLogout = findViewById(R.id.layoutLogout);
+        layoutHelpFeedback = findViewById(R.id.layoutHelpFeedback);
 
         loadUserData();
 
@@ -78,7 +79,18 @@ public class MoreActivity extends AppCompatActivity {
             finish();
         });
 
+        layoutHelpFeedback.setOnClickListener(v -> {
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setType("message/rfc822");
+            intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"support@civara.com"}); // Tumcha email taka
+            intent.putExtra(Intent.EXTRA_SUBJECT, "Civara App - Help & Feedback");
 
+            try {
+                startActivity(Intent.createChooser(intent, "Choose an Email client :"));
+            } catch (android.content.ActivityNotFoundException ex) {
+                // Email app nasel tr error handle kara
+            }
+        });
     }
     private void showLanguageDialog() {
         String[] languages = {"English", "मराठी (Marathi)", "हिन्दी (Hindi)"};
