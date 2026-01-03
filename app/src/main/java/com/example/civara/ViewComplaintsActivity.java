@@ -15,7 +15,7 @@ public class ViewComplaintsActivity extends AppCompatActivity {
 
     private RecyclerView rvComplaints;
     private ComplaintAdapter adapter;
-    private List<Complaint> fullList;
+    private List<Complaint> complaintList; // Local list
     private FirebaseFirestore db;
     private String userId;
 
@@ -27,12 +27,9 @@ public class ViewComplaintsActivity extends AppCompatActivity {
         rvComplaints = findViewById(R.id.rvComplaints);
         SearchView searchView = findViewById(R.id.searchView);
 
-        fullList = new ArrayList<>();
+        complaintList = new ArrayList<>();
         db = FirebaseFirestore.getInstance();
-
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        }
+        userId = FirebaseAuth.getInstance().getUid();
 
         setupRecyclerView();
 
@@ -42,9 +39,7 @@ public class ViewComplaintsActivity extends AppCompatActivity {
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                if (adapter != null) {
-                    adapter.getFilter().filter(newText);
-                }
+                adapter.getFilter().filter(newText);
                 return true;
             }
         });
@@ -53,7 +48,7 @@ public class ViewComplaintsActivity extends AppCompatActivity {
     }
 
     private void setupRecyclerView() {
-        adapter = new ComplaintAdapter(fullList, complaint -> {
+        adapter = new ComplaintAdapter(complaintList, complaint -> {
             Intent intent = new Intent(this, ComplaintStatusActivity.class);
             intent.putExtra("complaintId", complaint.getDocumentId());
             startActivity(intent);
@@ -67,14 +62,13 @@ public class ViewComplaintsActivity extends AppCompatActivity {
                 .whereEqualTo("userId", userId)
                 .get()
                 .addOnSuccessListener(query -> {
-                    fullList.clear();
+                    List<Complaint> fetchedList = new ArrayList<>();
                     query.forEach(doc -> {
                         Complaint c = doc.toObject(Complaint.class);
-                        // Assigning the Firestore Document ID to the object
                         c.setDocumentId(doc.getId());
-                        fullList.add(c);
+                        fetchedList.add(c);
                     });
-                    adapter.updateList(fullList);
+                    adapter.updateList(fetchedList); // Refresh the list and backup
                 });
     }
 }
