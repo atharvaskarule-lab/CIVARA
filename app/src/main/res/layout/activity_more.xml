@@ -183,6 +183,8 @@
                             android:text="Help &amp; Feedback" />
                     </LinearLayout>
 
+                    <View style="@style/MoreMenuDivider" />
+
                     <LinearLayout
                         android:id="@+id/layoutAbout"
                         style="@style/MoreMenuItem"
@@ -217,7 +219,7 @@
                         <TextView
                             style="@style/MoreMenuText"
                             android:text="Logout"
-                            android:textColor="#EF4444" />
+                            android:textColor="#D03838" />
                     </LinearLayout>
 
                 </LinearLayout>
