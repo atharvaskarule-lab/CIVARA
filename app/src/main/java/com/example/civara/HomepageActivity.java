@@ -108,6 +108,13 @@ public class HomepageActivity extends AppCompatActivity {
             mAuth.signOut();
             redirectToLogin();
         });
+
+        btnChatbot.setOnClickListener(v -> {
+            // 1. Create the Intent to move from Homepage to ChatbotActivity
+            Intent intent = new Intent(HomepageActivity.this, ChatbotActivity.class);
+
+            startActivity(intent);
+        });
     }
 
     private void setupBottomNavigation() {
