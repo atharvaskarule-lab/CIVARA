@@ -1,77 +1,151 @@
 package com.example.civara;
 
 import android.os.Bundle;
-import android.view.View;
+import android.util.Log;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class ChatbotActivity extends AppCompatActivity {
 
     private RecyclerView rvChat;
     private EditText etMessage;
-    private ImageButton btnSendMessage;
+    private FloatingActionButton btnSendMessage;
     private ChatAdapter chatAdapter;
     private List<ChatMessage> messageList;
+
+    private static final MediaType JSON
+            = MediaType.get("application/json; charset=utf-8");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        // Ensure this name matches your XML filename exactly!
         setContentView(R.layout.activity_chatbot);
 
-        // Make sure you don't call findViewById for views that don't exist yet
-        initViews();
-    }
-
-    private void initViews() {
         rvChat = findViewById(R.id.rvChat);
         etMessage = findViewById(R.id.etMessage);
         btnSendMessage = findViewById(R.id.btnSendMessage);
-        messageList = new ArrayList<>();
-    }
 
-    private void setupChat() {
+        messageList = new ArrayList<>();
         chatAdapter = new ChatAdapter(messageList);
+
         rvChat.setLayoutManager(new LinearLayoutManager(this));
         rvChat.setAdapter(chatAdapter);
 
-        // Initial Welcome Message
-        addMessage("Hello! I am your Civara Assistant. How can I help you today?", false);
+        addMessage("Hello! I am Civara Assistant 🤖", false);
+
+        btnSendMessage.setOnClickListener(v -> {
+            String userMsg = etMessage.getText().toString().trim();
+            if (!userMsg.isEmpty()) {
+                askGemini(userMsg);
+            }
+        });
     }
 
-    private void sendMessage(String userMsg) {
+    private void askGemini(String userMsg) {
+
         addMessage(userMsg, true);
         etMessage.setText("");
 
-        // Simulate Bot Logic / API Call
-        rvChat.postDelayed(() -> {
-            String response = getBotResponse(userMsg.toLowerCase());
-            addMessage(response, false);
-        }, 1000);
+        OkHttpClient client = new OkHttpClient();
+
+        try {
+            JSONObject textPart = new JSONObject();
+            textPart.put("text", userMsg);
+
+            JSONArray parts = new JSONArray();
+            parts.put(textPart);
+
+            JSONObject content = new JSONObject();
+            content.put("parts", parts);
+
+            JSONArray contents = new JSONArray();
+            contents.put(content);
+
+            JSONObject body = new JSONObject();
+            body.put("contents", contents);
+
+
+            RequestBody requestBody =
+                    RequestBody.create(body.toString(), JSON);
+
+            String apiKey = getString(R.string.GEMINI_API_KEY);
+
+            Request request = new Request.Builder()
+                    .url("https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + apiKey)
+                    .post(requestBody)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    runOnUiThread(() ->
+                            addMessage("❌ Network error", false));
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+
+                    String res = response.body() != null ? response.body().string() : "";
+                    Log.d("GEMINI_RESPONSE", res);
+
+                    try {
+                        JSONObject json = new JSONObject(res);
+
+                        JSONArray candidates = json.getJSONArray("candidates");
+
+                        JSONObject content =
+                                candidates.getJSONObject(0)
+                                        .getJSONObject("content");
+
+                        JSONArray parts =
+                                content.getJSONArray("parts");
+
+                        String reply =
+                                parts.getJSONObject(0)
+                                        .getString("text");
+
+                        runOnUiThread(() ->
+                                addMessage(reply, false));
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        runOnUiThread(() ->
+                                addMessage("⚠️ Gemini response error", false));
+                    }
+                }
+            });
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
+
 
     private void addMessage(String text, boolean isUser) {
         messageList.add(new ChatMessage(text, isUser));
         chatAdapter.notifyItemInserted(messageList.size() - 1);
         rvChat.scrollToPosition(messageList.size() - 1);
-    }
-
-    // This is where you define the "Desire function" logic
-    private String getBotResponse(String input) {
-        if (input.contains("pothole") || input.contains("complaint")) {
-            return "You can report issues in the 'Complaint Portal'. Would you like me to open it for you?";
-        } else if (input.contains("sos") || input.contains("danger")) {
-            return "If you are in danger, please tap the SOS button on the dashboard immediately!";
-        } else if (input.contains("event")) {
-            return "You can check the latest city events in the 'Event Calendar' section.";
-        } else {
-            return "I'm not sure about that. Try asking about complaints, events, or safety.";
-        }
     }
 }

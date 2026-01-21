@@ -15,7 +15,7 @@
         android:background="#0D9488"
         app:title="Civara Assistant"
         app:navigationIcon="@android:drawable/ic_menu_revert"
-        app:titleTextColor="#FFFFFF" />
+        app:titleTextColor="#000000" />
 </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -32,7 +32,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:background="#FFFFFF"
+        android:background="#000000"
         android:orientation="horizontal"
         android:padding="10dp"
         android:elevation="10dp">
@@ -63,7 +63,7 @@
             app:fabCustomSize="48dp"
             android:src="@android:drawable/ic_menu_send"
             app:backgroundTint="#0D9488"
-            app:tint="#FFFFFF"
+            app:tint="#000000"
             app:elevation="2dp"/>
     </LinearLayout>
 </RelativeLayout>

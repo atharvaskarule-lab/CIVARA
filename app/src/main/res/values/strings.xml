@@ -31,6 +31,8 @@
     <string name="action_upload_image">Upload Image</string>
     <string name="action_submit_complaint">Submit Complaint</string>
     <string name="openweather_api_key">57cd72570282820578e222f1d09acc34</string>
+    <string name="GEMINI_API_KEY">AIzaSyCW4ng-9o9brPDmtaZT-L8dagL4vzwZXcY</string>
+
     <string name="welcome_message">Hi, %1$s 👋</string>
         <!-- ... other strings ... -->
         <string name="menu_home">Home</string>
