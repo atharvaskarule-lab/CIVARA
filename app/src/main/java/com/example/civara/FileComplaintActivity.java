@@ -25,6 +25,7 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.chip.Chip;
+import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -44,7 +45,8 @@ import java.util.Map;
 public class FileComplaintActivity extends AppCompatActivity {
 
     private TextInputEditText etDescription;
-    private Chip chipGarbage, chipRoad, chipWater, chipSanitation, chipStreet, chipPark, chipOtherGeneral;
+    private ChipGroup chipGroupType;
+    private TextView tvAdminName;
     private MaterialCardView btnUploadImage;
     private ImageView ivPreview;
     private TextView tvUploadStatus;
@@ -58,6 +60,9 @@ public class FileComplaintActivity extends AppCompatActivity {
     private double latitude = 0.0, longitude = 0.0;
     private FirebaseFirestore db;
 
+    private Map<String, String> categoryDescriptions;
+    private Map<String, String> categoryAdmins;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,20 +71,37 @@ public class FileComplaintActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
-        // Bind UI Elements
+        initializeCategoryData();
+
         etDescription = findViewById(R.id.etDescription);
-        chipGarbage = findViewById(R.id.chipGarbage);
-        chipRoad = findViewById(R.id.chipRoad);
-        chipWater = findViewById(R.id.chipWater);
-        chipSanitation = findViewById(R.id.chipSanitation);
-        chipStreet = findViewById(R.id.chipStreet);
-        chipPark = findViewById(R.id.chipPark);
-        chipOtherGeneral = findViewById(R.id.chipOtherGeneral);
+        chipGroupType = findViewById(R.id.chipGroupType);
+        tvAdminName = findViewById(R.id.tvAdminName);
         btnSubmit = findViewById(R.id.btnSubmitComplaint);
         btnUploadImage = findViewById(R.id.btnUploadImage);
         ivPreview = findViewById(R.id.ivPreview);
         tvUploadStatus = findViewById(R.id.tvUploadStatus);
         loadingOverlay = findViewById(R.id.loadingOverlay);
+
+        chipGroupType.setOnCheckedStateChangeListener((group, checkedChipIds) -> {
+            etDescription.setText("");
+            tvAdminName.setVisibility(View.GONE);
+
+            if (!checkedChipIds.isEmpty()) {
+                Chip selectedChip = findViewById(checkedChipIds.get(0));
+                String category = selectedChip.getText().toString();
+
+                String description = categoryDescriptions.get(category);
+                if (description != null) {
+                    etDescription.setText(description);
+                }
+
+                String admin = categoryAdmins.get(category);
+                if (admin != null) {
+                    tvAdminName.setText("Admin contact: " + admin);
+                    tvAdminName.setVisibility(View.VISIBLE);
+                }
+            }
+        });
 
         btnUploadImage.setOnClickListener(v -> {
             Intent intent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
@@ -90,17 +112,43 @@ public class FileComplaintActivity extends AppCompatActivity {
         checkLocationPermission();
     }
 
+    private void initializeCategoryData() {
+        categoryDescriptions = new HashMap<>();
+        categoryDescriptions.put("Garbage", "Please describe the location and nature of the garbage issue...");
+        categoryDescriptions.put("Road Damage", "Please specify the type of road damage...");
+        categoryDescriptions.put("Water Supply", "Detail the water supply issue...");
+        categoryDescriptions.put("Sanitation", "Describe any sanitation concerns...");
+        categoryDescriptions.put("Street Lighting", "Report non-functional street lights...");
+        categoryDescriptions.put("Parks And Public's Places", "Explain issues in parks...");
+        categoryDescriptions.put("Other General Complaints", "Detailed description of other complaints...");
+
+        categoryAdmins = new HashMap<>();
+        categoryAdmins.put("Garbage", "Mr. John Doe");
+        categoryAdmins.put("Road Damage", "Ms. Jane Smith");
+        categoryAdmins.put("Water Supply", "Dr. Robert Johnson");
+        categoryAdmins.put("Sanitation", "Mr. David Lee");
+        categoryAdmins.put("Street Lighting", "Ms. Emily White");
+        categoryAdmins.put("Parks And Public's Places", "Mr. Michael Brown");
+        categoryAdmins.put("Other General Complaints", "General Admin Support");
+    }
+
     private void validateAndSubmit() {
         String description = etDescription.getText().toString().trim();
         List<String> categories = new ArrayList<>();
 
-        if (chipGarbage.isChecked()) categories.add("Garbage");
-        if (chipRoad.isChecked()) categories.add("Road Damage");
-        if (chipWater.isChecked()) categories.add("Water Supply");
-        if (chipSanitation.isChecked()) categories.add("Sanitation");
-        if (chipStreet.isChecked()) categories.add("Street Lighting");
-        if (chipPark.isChecked()) categories.add("Parks");
-        if (chipOtherGeneral.isChecked()) categories.add("Other");
+        for (int id : chipGroupType.getCheckedChipIds()) {
+            Chip chip = findViewById(id);
+            if (chip != null) {
+                String categoryText = chip.getText().toString();
+                if (categoryText.equals("Parks And Public's Places")) {
+                    categories.add("Parks");
+                } else if (categoryText.equals("Other General Complaints")) {
+                    categories.add("Other");
+                } else {
+                    categories.add(categoryText);
+                }
+            }
+        }
 
         if (description.isEmpty()) {
             etDescription.setError("Description is required");
@@ -115,35 +163,44 @@ public class FileComplaintActivity extends AppCompatActivity {
         saveToFirestore(description, categories);
     }
 
+    // UPDATED METHOD
     private void saveToFirestore(String description, List<String> categories) {
         if (loadingOverlay != null) loadingOverlay.setVisibility(View.VISIBLE);
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            Toast.makeText(this, "User not logged in!", Toast.LENGTH_SHORT).show();
+            if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
+            btnSubmit.setEnabled(true);
+            return;
+        }
+
+        String currentUserId = user.getUid();
         String currentDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date());
 
         Map<String, Object> complaint = new HashMap<>();
-        String name = (user != null && user.getDisplayName() != null && !user.getDisplayName().isEmpty())
-                ? user.getDisplayName() : (user != null ? user.getEmail() : "Anonymous User");
 
-        complaint.put("name", name);
+        complaint.put("userId", currentUserId);
+        complaint.put("name", user.getDisplayName() != null ? user.getDisplayName() : "Anonymous");
+        complaint.put("imageUrl", base64Image);
         complaint.put("date", currentDate);
-        complaint.put("title", categories.get(0));
         complaint.put("description", description);
-        complaint.put("categories", categories);
         complaint.put("status", "Pending");
+        complaint.put("timestamp", System.currentTimeMillis());
         complaint.put("latitude", latitude);
         complaint.put("longitude", longitude);
-        complaint.put("timestamp", System.currentTimeMillis());
-        complaint.put("userId", user != null ? user.getUid() : "anonymous");
 
-        if (!base64Image.isEmpty()) {
-            complaint.put("imageUrl", base64Image);
+        if (!categories.isEmpty()) {
+            String selectedCat = categories.get(0);
+            complaint.put("category", selectedCat);
+            complaint.put("title", selectedCat);
         }
 
+        // Collection name should match ViewComplaintsActivity
         db.collection("complaints").add(complaint)
                 .addOnSuccessListener(ref -> {
                     if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
-                    showSuccessDialog(); // Show Dialog instead of Toast
+                    showSuccessDialog();
                 })
                 .addOnFailureListener(e -> {
                     if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
@@ -155,7 +212,7 @@ public class FileComplaintActivity extends AppCompatActivity {
     private void showSuccessDialog() {
         new MaterialAlertDialogBuilder(this)
                 .setTitle("Complaint Filed")
-                .setMessage("Your issue has been recorded successfully. You can track the status in the 'My Complaints' section.")
+                .setMessage("Your issue has been recorded successfully.")
                 .setCancelable(false)
                 .setPositiveButton("Finish", (dialog, which) -> {
                     dialog.dismiss();
@@ -170,18 +227,14 @@ public class FileComplaintActivity extends AppCompatActivity {
         if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
             imageUri = data.getData();
             ivPreview.setImageURI(imageUri);
-            ivPreview.setScaleType(ImageView.ScaleType.CENTER_CROP); // Improved preview look
-
+            ivPreview.setVisibility(View.VISIBLE);
             try {
                 InputStream inputStream = getContentResolver().openInputStream(imageUri);
                 Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-
-                // Firestore string limit is strict. 30% quality ensures document remains < 1MB.
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 30, baos);
                 byte[] imageBytes = baos.toByteArray();
                 base64Image = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-
                 tvUploadStatus.setText("Photo attached");
             } catch (Exception e) {
                 Toast.makeText(this, "Failed to process image", Toast.LENGTH_SHORT).show();

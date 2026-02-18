@@ -24,6 +24,9 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import android.content.Intent; // For the startActivity error
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -157,23 +160,56 @@ public class LoginActivity extends AppCompatActivity {
 
     private void checkUserRoleAndRedirect(String uid) {
         setLoading(true);
+        // 1. "users" ko "Users" karein (Check your Firestore collection name)
         db.collection("users").document(uid).get()
                 .addOnSuccessListener(documentSnapshot -> {
                     setLoading(false);
                     if (documentSnapshot.exists()) {
                         String role = documentSnapshot.getString("role");
+                        String dept = documentSnapshot.getString("department");
+
                         Intent intent;
-                        if ("admin".equals(role)) {
-                            intent = new Intent(LoginActivity.this, AdminDashboardActivity.class);
-                        } else {
+
+                        // 2. Logic for Garbage Admin
+                        if ("ADMIN".equalsIgnoreCase(role) && "Garbage".equalsIgnoreCase(dept)) {
+                            intent = new Intent(LoginActivity.this, GarbageAdminActivity.class);
+                            Toast.makeText(this, "Welcome Garbage Admin", Toast.LENGTH_SHORT).show();
+                        }
+                        // 3. Logic for Regular User
+                        else {
                             intent = new Intent(LoginActivity.this, HomepageActivity.class);
                         }
+
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                         finish();
+                    } else {
+                        Toast.makeText(this, "User data not found in Firestore", Toast.LENGTH_LONG).show();
                     }
                 })
-                .addOnFailureListener(e -> setLoading(false));
+                .addOnFailureListener(e -> {
+                    setLoading(false);
+                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // Inside your LoginActivity.java
+    private void checkUserRole(String uid) {
+        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(uid);
+
+        userRef.get().addOnSuccessListener(dataSnapshot -> {
+            String role = dataSnapshot.child("role").getValue(String.class);
+            String dept = dataSnapshot.child("department").getValue(String.class);
+
+            if ("ADMIN".equals(role) && "Garbage".equals(dept)) {
+                // Send to Garbage Admin Panel
+                startActivity(new Intent(LoginActivity.this, GarbageAdminActivity.class));
+            } else {
+                // Send to regular User Dashboard
+                startActivity(new Intent(LoginActivity.this, GarbageAdminActivity.class));
+            }
+            finish();
+        });
     }
 
     private boolean validateInputs() {

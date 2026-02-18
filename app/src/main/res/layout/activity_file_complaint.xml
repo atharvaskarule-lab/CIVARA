@@ -116,6 +116,16 @@
                         android:textColor="#1E293B"
                         android:textStyle="bold" />
 
+                    <!-- Added TextView for Admin Name -->
+                    <TextView
+                        android:id="@+id/tvAdminName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="#64748B"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
+
                     <com.google.android.material.textfield.TextInputLayout
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"

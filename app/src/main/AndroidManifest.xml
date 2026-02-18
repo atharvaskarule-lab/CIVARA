@@ -53,6 +53,7 @@
         <activity android:name=".ManageComplaintsActivity" android:exported="false" />
         <activity android:name=".AddEventActivity" android:exported="false" />
         <activity android:name=".ChatbotActivity" android:exported="false" />
+        <activity android:name=".GarbageAdminActivity" android:exported="false" />
 
     </application>
 </manifest>
