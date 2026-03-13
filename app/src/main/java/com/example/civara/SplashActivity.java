@@ -29,6 +29,6 @@ public class SplashActivity extends AppCompatActivity {
                 // Close this activity so the user can't go back to it
                 finish();
             }
-        }, 3000);
+        }, 1500);
     }
 }
