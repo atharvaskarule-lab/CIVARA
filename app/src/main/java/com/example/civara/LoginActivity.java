@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.firebase.auth.FirebaseAuth;
@@ -24,9 +25,6 @@ import com.google.firebase.auth.FirebaseAuthInvalidCredentialsException;
 import com.google.firebase.auth.FirebaseAuthInvalidUserException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import android.content.Intent; // For the startActivity error
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -50,7 +48,6 @@ public class LoginActivity extends AppCompatActivity {
         initViews();
         setupClickListeners();
 
-        // Auto-login check
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             currentUser.reload().addOnCompleteListener(task -> {
@@ -92,10 +89,10 @@ public class LoginActivity extends AppCompatActivity {
                         FirebaseUser user = mAuth.getCurrentUser();
                         if (user != null) {
                             user.reload().addOnCompleteListener(reloadTask -> {
-                                setLoading(false);
                                 if (user.isEmailVerified()) {
                                     checkUserRoleAndRedirect(user.getUid());
                                 } else {
+                                    setLoading(false);
                                     showEmailVerificationDialog(user);
                                     mAuth.signOut();
                                 }
@@ -108,83 +105,50 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    private void showEmailVerificationDialog(FirebaseUser user) {
-        new AlertDialog.Builder(this)
-                .setTitle("Verify Your Email")
-                .setMessage("A verification link was sent to " + user.getEmail() + ". Please check your inbox and spam folder.")
-                .setPositiveButton("Resend Email", (d, w) -> {
-                    user.sendEmailVerification()
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(LoginActivity.this, "Verification email resent!", Toast.LENGTH_SHORT).show();
-                                } else {
-                                    Log.e(TAG, "Resend failed: " + task.getException().getMessage());
-                                    Toast.makeText(LoginActivity.this, "Error: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                                }
-                            });
-                })
-                .setNegativeButton("Dismiss", null)
-                .show();
-    }
-
-    private void showForgotPasswordDialog() {
-        View view = LayoutInflater.from(this).inflate(R.layout.forgot_password, null);
-        EditText etDialogEmail = view.findViewById(R.id.etDialogEmail);
-
-        new AlertDialog.Builder(this)
-                .setTitle("Reset Password")
-                .setView(view)
-                .setPositiveButton("Send Link", (d, w) -> {
-                    String email = etDialogEmail.getText().toString().trim();
-
-                    if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                        Toast.makeText(this, "Please enter a valid email", Toast.LENGTH_SHORT).show();
-                        return;
-                    }
-
-                    // SEND PASSWORD RESET EMAIL
-                    mAuth.sendPasswordResetEmail(email)
-                            .addOnCompleteListener(task -> {
-                                if (task.isSuccessful()) {
-                                    Toast.makeText(LoginActivity.this, "Reset link sent to " + email, Toast.LENGTH_LONG).show();
-                                } else {
-                                    String error = task.getException() != null ? task.getException().getMessage() : "Unknown error";
-                                    Log.e(TAG, "Reset Error: " + error);
-                                    Toast.makeText(LoginActivity.this, "Failed: " + error, Toast.LENGTH_LONG).show();
-                                }
-                            });
-                })
-                .setNegativeButton("Cancel", null)
-                .show();
-    }
-
     private void checkUserRoleAndRedirect(String uid) {
         setLoading(true);
-        // 1. "users" ko "Users" karein (Check your Firestore collection name)
         db.collection("users").document(uid).get()
-                .addOnSuccessListener(documentSnapshot -> {
+                .addOnSuccessListener(document -> {
                     setLoading(false);
-                    if (documentSnapshot.exists()) {
-                        String role = documentSnapshot.getString("role");
-                        String dept = documentSnapshot.getString("department");
+                    if (document.exists()) {
+                        String role = document.getString("role");
+                        String dept = document.getString("department");
 
                         Intent intent;
 
-                        // 2. Logic for Garbage Admin
-                        if ("ADMIN".equalsIgnoreCase(role) && "Garbage".equalsIgnoreCase(dept)) {
-                            intent = new Intent(LoginActivity.this, GarbageAdminActivity.class);
-                            Toast.makeText(this, "Welcome Garbage Admin", Toast.LENGTH_SHORT).show();
-                        }
-                        // 3. Logic for Regular User
-                        else {
-                            intent = new Intent(LoginActivity.this, HomepageActivity.class);
+                        // Role check logic
+                        if ("admin".equalsIgnoreCase(role)) {
+
+                            // AGAR SUPER ADMIN HAI (Jo aapne dashboard manga hai)
+                            if (dept == null || dept.isEmpty() || "super".equalsIgnoreCase(dept)) {
+                                intent = new Intent(this, AdminDashboardActivity.class);
+                                Toast.makeText(this, "Welcome to Admin Dashboard", Toast.LENGTH_SHORT).show();
+                            }
+                            // AGAR DEPARTMENT SPECIFIC ADMIN HAI
+                            else if ("garbage".equalsIgnoreCase(dept)) {
+                                intent = new Intent(this, GarbageAdminActivity.class);
+                            } else if ("road".equalsIgnoreCase(dept)) {
+                                intent = new Intent(this, RoadDamageAdminActivity.class);
+                            } else if ("water".equalsIgnoreCase(dept)) {
+                                intent = new Intent(this, WaterSupplyAdminActivity.class);
+                            } else if ("sanitation".equalsIgnoreCase(dept)) {
+                                intent = new Intent(this, SanitationAdminActivity.class);
+                            } else if ("parks".equalsIgnoreCase(dept)) {
+                                intent = new Intent(this, ParksAdminActivity.class);
+                            } else {
+                                intent = new Intent(this, HomepageActivity.class);
+                            }
+
+                        } else {
+                            // Regular user ke liye Homepage (Aapne MainActivity bola tha, maine HomepageActivity rakha hai flow ke liye)
+                            intent = new Intent(this, HomepageActivity.class);
                         }
 
                         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                         startActivity(intent);
                         finish();
                     } else {
-                        Toast.makeText(this, "User data not found in Firestore", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "User data not found!", Toast.LENGTH_LONG).show();
                     }
                 })
                 .addOnFailureListener(e -> {
@@ -193,32 +157,13 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    // Inside your LoginActivity.java
-    private void checkUserRole(String uid) {
-        DatabaseReference userRef = FirebaseDatabase.getInstance().getReference("Users").child(uid);
-
-        userRef.get().addOnSuccessListener(dataSnapshot -> {
-            String role = dataSnapshot.child("role").getValue(String.class);
-            String dept = dataSnapshot.child("department").getValue(String.class);
-
-            if ("ADMIN".equals(role) && "Garbage".equals(dept)) {
-                // Send to Garbage Admin Panel
-                startActivity(new Intent(LoginActivity.this, GarbageAdminActivity.class));
-            } else {
-                // Send to regular User Dashboard
-                startActivity(new Intent(LoginActivity.this, GarbageAdminActivity.class));
-            }
-            finish();
-        });
-    }
-
     private boolean validateInputs() {
         String email = etEmail.getText().toString().trim();
         String password = etPassword.getText().toString().trim();
         boolean valid = true;
 
-        if (TextUtils.isEmpty(email)) {
-            tilEmail.setError("Email required");
+        if (TextUtils.isEmpty(email) || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            tilEmail.setError("Enter a valid email");
             valid = false;
         } else {
             tilEmail.setError(null);
@@ -233,14 +178,45 @@ public class LoginActivity extends AppCompatActivity {
         return valid;
     }
 
-    private void handleLoginFailure(@NonNull com.google.android.gms.tasks.Task<?> task) {
+    private void showForgotPasswordDialog() {
+        View view = LayoutInflater.from(this).inflate(R.layout.forgot_password, null);
+        EditText etDialogEmail = view.findViewById(R.id.etDialogEmail);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Reset Password")
+                .setView(view)
+                .setPositiveButton("Send Link", (d, w) -> {
+                    String email = etDialogEmail.getText().toString().trim();
+                    if (!TextUtils.isEmpty(email)) {
+                        mAuth.sendPasswordResetEmail(email)
+                                .addOnCompleteListener(task -> {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(this, "Reset link sent!", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
+
+    private void showEmailVerificationDialog(FirebaseUser user) {
+        new AlertDialog.Builder(this)
+                .setTitle("Verify Email")
+                .setMessage("Please verify your email to continue.")
+                .setPositiveButton("Resend", (d, w) -> user.sendEmailVerification())
+                .setNegativeButton("OK", null)
+                .show();
+    }
+
+    private void handleLoginFailure(@NonNull Task<?> task) {
         Exception e = task.getException();
         if (e instanceof FirebaseAuthInvalidUserException) {
-            tilEmail.setError("Account does not exist");
+            tilEmail.setError("User not found");
         } else if (e instanceof FirebaseAuthInvalidCredentialsException) {
-            tilPassword.setError("Incorrect password");
+            tilPassword.setError("Wrong password");
         } else {
-            Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Login Failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 

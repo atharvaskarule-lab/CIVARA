@@ -54,6 +54,10 @@
         <activity android:name=".AddEventActivity" android:exported="false" />
         <activity android:name=".ChatbotActivity" android:exported="false" />
         <activity android:name=".GarbageAdminActivity" android:exported="false" />
+        <activity android:name=".RoadDamageAdminActivity" android:exported="false" />
+        <activity android:name=".WaterSupplyAdminActivity" android:exported="false" />
+        <activity android:name=".SanitationAdminActivity" android:exported="false" />
+        <activity android:name=".ParksAdminActivity" android:exported="false" />
 
     </application>
 </manifest>

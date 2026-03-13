@@ -123,12 +123,12 @@ public class FileComplaintActivity extends AppCompatActivity {
         categoryDescriptions.put("Other General Complaints", "Detailed description of other complaints...");
 
         categoryAdmins = new HashMap<>();
-        categoryAdmins.put("Garbage", "Mr. John Doe");
-        categoryAdmins.put("Road Damage", "Ms. Jane Smith");
-        categoryAdmins.put("Water Supply", "Dr. Robert Johnson");
-        categoryAdmins.put("Sanitation", "Mr. David Lee");
-        categoryAdmins.put("Street Lighting", "Ms. Emily White");
-        categoryAdmins.put("Parks And Public's Places", "Mr. Michael Brown");
+        categoryAdmins.put("Garbage", "Mr. Rupesh Bhujade");
+        categoryAdmins.put("Road Damage", "Ms. Ayush Karwade");
+        categoryAdmins.put("Water Supply", "Dr. Mousmi Joshi");
+        categoryAdmins.put("Sanitation", "Mr. Gaurav Patil");
+        categoryAdmins.put("Street Lighting", "Ms. Ashlesh Sorte");
+        categoryAdmins.put("Parks And Public's Places", "Mr. Sahil Karwade");
         categoryAdmins.put("Other General Complaints", "General Admin Support");
     }
 
@@ -163,7 +163,7 @@ public class FileComplaintActivity extends AppCompatActivity {
         saveToFirestore(description, categories);
     }
 
-    // UPDATED METHOD
+    // PERFECTLY UPDATED SAVE METHOD
     private void saveToFirestore(String description, List<String> categories) {
         if (loadingOverlay != null) loadingOverlay.setVisibility(View.VISIBLE);
 
@@ -176,12 +176,17 @@ public class FileComplaintActivity extends AppCompatActivity {
         }
 
         String currentUserId = user.getUid();
+        String userEmail = user.getEmail() != null ? user.getEmail() : "No Email";
+        String userName = user.getDisplayName();
         String currentDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date());
 
         Map<String, Object> complaint = new HashMap<>();
 
+        // Admin Panel aur History dono ke liye correct mapping
         complaint.put("userId", currentUserId);
-        complaint.put("name", user.getDisplayName() != null ? user.getDisplayName() : "Anonymous");
+        complaint.put("email", userEmail); // Admin panel isi "email" field ko dhoondta hai
+        complaint.put("name", userName != null ? userName : userEmail); // History ke liye: display name na ho toh email dikhao
+
         complaint.put("imageUrl", base64Image);
         complaint.put("date", currentDate);
         complaint.put("description", description);
@@ -196,7 +201,6 @@ public class FileComplaintActivity extends AppCompatActivity {
             complaint.put("title", selectedCat);
         }
 
-        // Collection name should match ViewComplaintsActivity
         db.collection("complaints").add(complaint)
                 .addOnSuccessListener(ref -> {
                     if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);

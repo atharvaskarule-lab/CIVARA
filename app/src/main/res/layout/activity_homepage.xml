@@ -23,7 +23,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="20dp"
                 android:visibility="gone"
-                app:cardBackgroundColor="#FEE2E2"
+                app:cardBackgroundColor="#A67A7A"
                 app:cardCornerRadius="12dp"
                 app:cardElevation="4dp">
                 <LinearLayout

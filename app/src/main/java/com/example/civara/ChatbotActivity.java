@@ -127,12 +127,13 @@ public class ChatbotActivity extends AppCompatActivity {
                                         .getString("text");
 
                         runOnUiThread(() ->
+
                                 addMessage(reply, false));
 
                     } catch (Exception e) {
                         e.printStackTrace();
                         runOnUiThread(() ->
-                                addMessage("⚠️ Gemini response error", false));
+                                addMessage("⚠️ Chatbot response error", false));
                     }
                 }
             });
