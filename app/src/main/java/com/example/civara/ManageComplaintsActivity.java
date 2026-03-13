@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -50,9 +52,16 @@ public class ManageComplaintsActivity extends AppCompatActivity {
         complaintList = new ArrayList<>();
 
         // 2. Setup Adapter
-        // When a complaint is clicked, show the status update dialog
-        adapter = new ComplaintAdapter(complaintList, complaint -> {
-            showUpdateStatusDialog(complaint);
+        adapter = new ComplaintAdapter(complaintList, new ComplaintAdapter.OnComplaintClickListener() {
+            @Override
+            public void onComplaintClick(Complaint complaint) {
+                showUpdateStatusDialog(complaint);
+            }
+
+            @Override
+            public void onVoteClick(Complaint complaint) {
+                handleVote(complaint);
+            }
         });
 
         rvComplaints.setLayoutManager(new LinearLayoutManager(this));
@@ -71,6 +80,20 @@ public class ManageComplaintsActivity extends AppCompatActivity {
         fetchComplaints();
     }
 
+    private void handleVote(Complaint complaint) {
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null || complaint.getDocumentId() == null) return;
+
+        db.collection("complaints").document(complaint.getDocumentId())
+                .update("voterIds", FieldValue.arrayUnion(currentUserId),
+                        "voteCount", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Vote added!", Toast.LENGTH_SHORT).show();
+                    // fetchComplaints() will refresh the list automatically due to listener
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Vote failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
+    }
+
     private void setupSearchView() {
         searchViewAdmin.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -82,17 +105,12 @@ public class ManageComplaintsActivity extends AppCompatActivity {
             public boolean onQueryTextChange(String newText) {
                 if (adapter != null) {
                     adapter.getFilter().filter(newText);
-                    // Note: In a production app, you'd add a delay or a callback
-                    // to toggleEmptyState here if the search results are 0.
                 }
                 return true;
             }
         });
     }
 
-    /**
-     * Fetches complaints from Firestore with real-time updates.
-     */
     private void fetchComplaints() {
         if (!swipeRefreshLayout.isRefreshing()) {
             swipeRefreshLayout.setRefreshing(true);
@@ -112,7 +130,7 @@ public class ManageComplaintsActivity extends AppCompatActivity {
                         complaintList.clear();
                         for (QueryDocumentSnapshot doc : value) {
                             Complaint c = doc.toObject(Complaint.class);
-                            c.setDocumentId(doc.getId()); // Map the Firestore Auto-ID
+                            c.setDocumentId(doc.getId());
                             complaintList.add(c);
                         }
 
@@ -175,9 +193,6 @@ public class ManageComplaintsActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Toggles visibility between the list and the "No Complaints" message.
-     */
     private void toggleEmptyState(int count) {
         if (count == 0) {
             rvComplaints.setVisibility(View.GONE);

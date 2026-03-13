@@ -1,5 +1,8 @@
 package com.example.civara;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Complaint {
     private String documentId;
     private String title;
@@ -10,6 +13,8 @@ public class Complaint {
     private String imageUrl; // ADDED: To store the Base64 image string
     private double latitude;  // ADDED: For location support
     private double longitude; // ADDED: For location support
+    private List<String> voterIds = new ArrayList<>(); // List of user IDs who voted
+    private int voteCount = 0;
 
     public Complaint() {} // Required for Firestore
 
@@ -23,6 +28,16 @@ public class Complaint {
 
     public double getLongitude() { return longitude; }
     public void setLongitude(double longitude) { this.longitude = longitude; }
+
+    // VOTING GETTERS AND SETTERS
+    public List<String> getVoterIds() { return voterIds; }
+    public void setVoterIds(List<String> voterIds) { 
+        this.voterIds = voterIds; 
+        this.voteCount = (voterIds != null) ? voterIds.size() : 0;
+    }
+
+    public int getVoteCount() { return voteCount; }
+    public void setVoteCount(int voteCount) { this.voteCount = voteCount; }
 
     // EXISTING GETTERS AND SETTERS
     public String getName() { return name; }

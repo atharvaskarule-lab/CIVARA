@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -35,44 +37,62 @@ public class GarbageAdminActivity extends AppCompatActivity {
     }
 
     private void loadGarbageIssues() {
-        db.collection("Issues")
+        // Changed to "complaints" to match other activities, and added real-time listener
+        db.collection("complaints")
                 .whereEqualTo("category", "Garbage")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    garbageIssues.clear();
-
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        IssueModel issue = document.toObject(IssueModel.class);
-                        // 1. Loop mein ID save karna
-                        issue.setDocumentId(document.getId());
-                        garbageIssues.add(issue);
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        return;
                     }
-
-                    updateUI(garbageIssues);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    if (value != null) {
+                        garbageIssues.clear();
+                        for (QueryDocumentSnapshot document : value) {
+                            IssueModel issue = document.toObject(IssueModel.class);
+                            issue.setDocumentId(document.getId());
+                            garbageIssues.add(issue);
+                        }
+                        updateUI(garbageIssues);
+                    }
                 });
     }
 
-    // 2. updateUI method click listener ke saath
     private void updateUI(List<IssueModel> list) {
-        if (list.size() > 0) {
-            adapter = new GarbageAdapter(list, (issue, position) -> {
-                showStatusDialog(issue);
+        if (adapter == null) {
+            adapter = new GarbageAdapter(list, new GarbageAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(IssueModel issue, int position) {
+                    showStatusDialog(issue);
+                }
+
+                @Override
+                public void onVoteClick(IssueModel issue, int position) {
+                    handleVote(issue);
+                }
             });
+            adapter.setAdmin(true);
             recyclerView.setAdapter(adapter);
         } else {
-            Toast.makeText(this, "No issues found", Toast.LENGTH_SHORT).show();
+            adapter.notifyDataSetChanged();
         }
     }
 
-    // 3. Dialog Box status change karne ke liye
+    private void handleVote(IssueModel issue) {
+        String currentUid = FirebaseAuth.getInstance().getUid();
+        if (currentUid == null || issue.getDocumentId() == null) return;
+
+        db.collection("complaints").document(issue.getDocumentId())
+                .update("voterIds", FieldValue.arrayUnion(currentUid),
+                        "voteCount", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Vote added!", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(this, "Vote failed", Toast.LENGTH_SHORT).show());
+    }
+
     private void showStatusDialog(IssueModel issue) {
-        String[] options = {"Pending", "Resolved", "Rejected"};
+        String[] options = {"Pending", "Cleaning in Progress", "Resolved", "Rejected"};
 
         new AlertDialog.Builder(this)
-                .setTitle("Change Status")
+                .setTitle("Update Garbage Status")
                 .setItems(options, (dialog, which) -> {
                     String newStatus = options[which];
                     updateStatusInFirestore(issue.getDocumentId(), newStatus);
@@ -80,18 +100,16 @@ public class GarbageAdminActivity extends AppCompatActivity {
                 .show();
     }
 
-    // 4. Firestore Update function
     private void updateStatusInFirestore(String docId, String status) {
         if (docId == null) return;
 
-        db.collection("Issues").document(docId)
+        db.collection("complaints").document(docId)
                 .update("status", status)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Status updated to " + status, Toast.LENGTH_SHORT).show();
-                    loadGarbageIssues(); // List refresh karein
                 })
                 .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this, "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 }

@@ -29,6 +29,8 @@ import com.google.android.material.chip.ChipGroup;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -62,6 +64,8 @@ public class FileComplaintActivity extends AppCompatActivity {
 
     private Map<String, String> categoryDescriptions;
     private Map<String, String> categoryAdmins;
+
+    private static final double LOCATION_THRESHOLD = 0.0005; // Approx 50 meters
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,7 +112,7 @@ public class FileComplaintActivity extends AppCompatActivity {
             startActivityForResult(intent, 100);
         });
 
-        btnSubmit.setOnClickListener(v -> validateAndSubmit());
+        btnSubmit.setOnClickListener(v -> validateAndCheckDuplicates());
         checkLocationPermission();
     }
 
@@ -132,7 +136,7 @@ public class FileComplaintActivity extends AppCompatActivity {
         categoryAdmins.put("Other General Complaints", "General Admin Support");
     }
 
-    private void validateAndSubmit() {
+    private void validateAndCheckDuplicates() {
         String description = etDescription.getText().toString().trim();
         List<String> categories = new ArrayList<>();
 
@@ -159,14 +163,87 @@ public class FileComplaintActivity extends AppCompatActivity {
             return;
         }
 
-        btnSubmit.setEnabled(false);
-        saveToFirestore(description, categories);
-    }
+        if (latitude == 0.0 && longitude == 0.0) {
+            Toast.makeText(this, "Fetching location, please wait...", Toast.LENGTH_SHORT).show();
+            getLocation();
+            return;
+        }
 
-    // PERFECTLY UPDATED SAVE METHOD
-    private void saveToFirestore(String description, List<String> categories) {
+        btnSubmit.setEnabled(false);
         if (loadingOverlay != null) loadingOverlay.setVisibility(View.VISIBLE);
 
+        // Check for existing similar complaints in the same area
+        String selectedCat = categories.get(0);
+        db.collection("complaints")
+                .whereEqualTo("category", selectedCat)
+                .whereEqualTo("status", "Pending")
+                .get()
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        DocumentSnapshot similarComplaint = null;
+                        for (DocumentSnapshot doc : task.getResult()) {
+                            double compLat = doc.getDouble("latitude");
+                            double compLong = doc.getDouble("longitude");
+                            
+                            if (Math.abs(compLat - latitude) < LOCATION_THRESHOLD && 
+                                Math.abs(compLong - longitude) < LOCATION_THRESHOLD) {
+                                similarComplaint = doc;
+                                break;
+                            }
+                        }
+
+                        if (similarComplaint != null) {
+                            if (loadingOverlay != null) loadingOverlay.setVisibility(View.GONE);
+                            showDuplicateFoundDialog(similarComplaint.getId(), similarComplaint.getString("description"));
+                        } else {
+                            saveToFirestore(description, categories);
+                        }
+                    } else {
+                        saveToFirestore(description, categories);
+                    }
+                });
+    }
+
+    private void showDuplicateFoundDialog(String complaintId, String description) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Similar Complaint Found")
+                .setMessage("A similar complaint has already been filed at this location:\n\n\"" + description + "\"\n\nWould you like to support/vote for this complaint instead of filing a new one?")
+                .setPositiveButton("Vote & Support", (dialog, which) -> {
+                    voteForExistingComplaint(complaintId);
+                })
+                .setNegativeButton("File Anyway", (dialog, which) -> {
+                    if (loadingOverlay != null) loadingOverlay.setVisibility(View.VISIBLE);
+                    String desc = etDescription.getText().toString().trim();
+                    List<String> categories = new ArrayList<>();
+                    for (int id : chipGroupType.getCheckedChipIds()) {
+                        Chip chip = findViewById(id);
+                        if (chip != null) categories.add(chip.getText().toString());
+                    }
+                    saveToFirestore(desc, categories);
+                })
+                .setNeutralButton("Cancel", (dialog, which) -> btnSubmit.setEnabled(true))
+                .show();
+    }
+
+    private void voteForExistingComplaint(String complaintId) {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) return;
+        
+        String uid = user.getUid();
+        db.collection("complaints").document(complaintId)
+                .update("voterIds", FieldValue.arrayUnion(uid),
+                        "voteCount", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Vote recorded! Thank you for your support.", Toast.LENGTH_LONG).show();
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    btnSubmit.setEnabled(true);
+                    Toast.makeText(this, "Error voting: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    private void saveToFirestore(String description, List<String> categories) {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
             Toast.makeText(this, "User not logged in!", Toast.LENGTH_SHORT).show();
@@ -181,12 +258,9 @@ public class FileComplaintActivity extends AppCompatActivity {
         String currentDate = new SimpleDateFormat("dd MMM yyyy", Locale.getDefault()).format(new Date());
 
         Map<String, Object> complaint = new HashMap<>();
-
-        // Admin Panel aur History dono ke liye correct mapping
         complaint.put("userId", currentUserId);
-        complaint.put("email", userEmail); // Admin panel isi "email" field ko dhoondta hai
-        complaint.put("name", userName != null ? userName : userEmail); // History ke liye: display name na ho toh email dikhao
-
+        complaint.put("email", userEmail);
+        complaint.put("name", userName != null ? userName : userEmail);
         complaint.put("imageUrl", base64Image);
         complaint.put("date", currentDate);
         complaint.put("description", description);
@@ -194,6 +268,11 @@ public class FileComplaintActivity extends AppCompatActivity {
         complaint.put("timestamp", System.currentTimeMillis());
         complaint.put("latitude", latitude);
         complaint.put("longitude", longitude);
+        
+        List<String> voters = new ArrayList<>();
+        voters.add(currentUserId);
+        complaint.put("voterIds", voters);
+        complaint.put("voteCount", 1);
 
         if (!categories.isEmpty()) {
             String selectedCat = categories.get(0);

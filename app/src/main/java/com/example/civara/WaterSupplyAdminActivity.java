@@ -6,6 +6,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
@@ -33,33 +35,55 @@ public class WaterSupplyAdminActivity extends AppCompatActivity {
     }
 
     private void loadWaterIssues() {
-        // "Water Supply" category filter
+        // Using real-time listener for instant updates
         db.collection("complaints")
                 .whereEqualTo("category", "Water Supply")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    waterIssues.clear();
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        IssueModel issue = document.toObject(IssueModel.class);
-                        issue.setDocumentId(document.getId());
-                        waterIssues.add(issue);
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                    updateUI(waterIssues);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    if (value != null) {
+                        waterIssues.clear();
+                        for (QueryDocumentSnapshot document : value) {
+                            IssueModel issue = document.toObject(IssueModel.class);
+                            issue.setDocumentId(document.getId());
+                            waterIssues.add(issue);
+                        }
+                        updateUI(waterIssues);
+                    }
                 });
     }
 
     private void updateUI(List<IssueModel> list) {
-        if (list.size() > 0) {
-            adapter = new GarbageAdapter(list, (issue, position) -> {
-                showStatusDialog(issue);
+        if (adapter == null) {
+            adapter = new GarbageAdapter(list, new GarbageAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(IssueModel issue, int position) {
+                    showStatusDialog(issue);
+                }
+
+                @Override
+                public void onVoteClick(IssueModel issue, int position) {
+                    handleVote(issue);
+                }
             });
+            adapter.setAdmin(true); // Hide vote button for admin, show count
             recyclerView.setAdapter(adapter);
         } else {
-            Toast.makeText(this, "No Water Supply issues found", Toast.LENGTH_SHORT).show();
+            adapter.notifyDataSetChanged();
         }
+    }
+
+    private void handleVote(IssueModel issue) {
+        String currentUid = FirebaseAuth.getInstance().getUid();
+        if (currentUid == null || issue.getDocumentId() == null) return;
+
+        db.collection("complaints").document(issue.getDocumentId())
+                .update("voterIds", FieldValue.arrayUnion(currentUid),
+                        "voteCount", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Vote added!", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(this, "Vote failed", Toast.LENGTH_SHORT).show());
     }
 
     private void showStatusDialog(IssueModel issue) {
@@ -81,7 +105,6 @@ public class WaterSupplyAdminActivity extends AppCompatActivity {
                 .update("status", status)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Status updated to " + status, Toast.LENGTH_SHORT).show();
-                    loadWaterIssues();
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show();

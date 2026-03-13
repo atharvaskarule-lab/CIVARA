@@ -1,7 +1,7 @@
 package com.example.civara;
 
 import android.os.Bundle;
-import android.util.Log; // Log use karne ke liye import
+import android.util.Log;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -35,13 +36,35 @@ public class ViewComplaintsActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         complaintList = new ArrayList<>();
 
-        // Adapter ko yahan initialize kar rahe hain taaki notifyDataSetChanged kaam kare
-        adapter = new ComplaintAdapter(complaintList, complaint -> {
-            // Click logic yahan aayega
+        adapter = new ComplaintAdapter(complaintList, new ComplaintAdapter.OnComplaintClickListener() {
+            @Override
+            public void onComplaintClick(Complaint complaint) {
+                // Handle complaint click
+            }
+
+            @Override
+            public void onVoteClick(Complaint complaint) {
+                handleVote(complaint);
+            }
         });
         recyclerView.setAdapter(adapter);
 
         loadComplaintHistory();
+    }
+
+    private void handleVote(Complaint complaint) {
+        String currentUserId = FirebaseAuth.getInstance().getUid();
+        if (currentUserId == null || complaint.getDocumentId() == null) return;
+
+        db.collection("complaints").document(complaint.getDocumentId())
+                .update("voterIds", FieldValue.arrayUnion(currentUserId),
+                        "voteCount", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> {
+                    Toast.makeText(this, "Vote added!", Toast.LENGTH_SHORT).show();
+                    // Optionally refresh the list or local object
+                    loadComplaintHistory(); 
+                })
+                .addOnFailureListener(e -> Toast.makeText(this, "Vote failed: " + e.getMessage(), Toast.LENGTH_SHORT).show());
     }
 
     private void loadComplaintHistory() {
@@ -52,13 +75,11 @@ public class ViewComplaintsActivity extends AppCompatActivity {
 
         db.collection("complaints")
                 .whereEqualTo("userId", currentUserId)
-                // .orderBy("timestamp", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     progressBar.setVisibility(View.GONE);
                     complaintList.clear();
 
-                    // Log check karne ke liye (Android Studio ke Logcat mein dikhega)
                     Log.d("History", "Total documents found: " + queryDocumentSnapshots.size());
 
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
@@ -67,7 +88,6 @@ public class ViewComplaintsActivity extends AppCompatActivity {
                         complaintList.add(complaint);
                     }
 
-                    // List ko update karne ka sahi tarika
                     adapter.notifyDataSetChanged();
 
                     if (complaintList.isEmpty()) {

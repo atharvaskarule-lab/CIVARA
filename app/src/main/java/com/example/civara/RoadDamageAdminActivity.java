@@ -6,6 +6,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import java.util.ArrayList;
@@ -16,7 +18,7 @@ public class RoadDamageAdminActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private List<IssueModel> roadIssues;
     private FirebaseFirestore db;
-    private GarbageAdapter adapter; // Humne purana adapter hi reuse kiya hai kyunki layout same hai
+    private GarbageAdapter adapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -33,33 +35,54 @@ public class RoadDamageAdminActivity extends AppCompatActivity {
     }
 
     private void loadRoadIssues() {
-        // Yahan category filter "Road Damage" hai jo FileComplaintActivity se match karta hai
         db.collection("complaints")
                 .whereEqualTo("category", "Road Damage")
-                .get()
-                .addOnSuccessListener(queryDocumentSnapshots -> {
-                    roadIssues.clear();
-                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                        IssueModel issue = document.toObject(IssueModel.class);
-                        issue.setDocumentId(document.getId());
-                        roadIssues.add(issue);
+                .addSnapshotListener((value, error) -> {
+                    if (error != null) {
+                        Toast.makeText(this, "Error: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+                        return;
                     }
-                    updateUI(roadIssues);
-                })
-                .addOnFailureListener(e -> {
-                    Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    if (value != null) {
+                        roadIssues.clear();
+                        for (QueryDocumentSnapshot document : value) {
+                            IssueModel issue = document.toObject(IssueModel.class);
+                            issue.setDocumentId(document.getId());
+                            roadIssues.add(issue);
+                        }
+                        updateUI(roadIssues);
+                    }
                 });
     }
 
     private void updateUI(List<IssueModel> list) {
-        if (list.size() > 0) {
-            adapter = new GarbageAdapter(list, (issue, position) -> {
-                showStatusDialog(issue);
+        if (adapter == null) {
+            adapter = new GarbageAdapter(list, new GarbageAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(IssueModel issue, int position) {
+                    showStatusDialog(issue);
+                }
+
+                @Override
+                public void onVoteClick(IssueModel issue, int position) {
+                    handleVote(issue);
+                }
             });
+            adapter.setAdmin(true);
             recyclerView.setAdapter(adapter);
         } else {
-            Toast.makeText(this, "No Road Damage issues found", Toast.LENGTH_SHORT).show();
+            adapter.notifyDataSetChanged();
         }
+    }
+
+    private void handleVote(IssueModel issue) {
+        String currentUid = FirebaseAuth.getInstance().getUid();
+        if (currentUid == null || issue.getDocumentId() == null) return;
+
+        db.collection("complaints").document(issue.getDocumentId())
+                .update("voterIds", FieldValue.arrayUnion(currentUid),
+                        "voteCount", FieldValue.increment(1))
+                .addOnSuccessListener(aVoid -> Toast.makeText(this, "Vote added!", Toast.LENGTH_SHORT).show())
+                .addOnFailureListener(e -> Toast.makeText(this, "Vote failed", Toast.LENGTH_SHORT).show());
     }
 
     private void showStatusDialog(IssueModel issue) {
@@ -81,7 +104,6 @@ public class RoadDamageAdminActivity extends AppCompatActivity {
                 .update("status", status)
                 .addOnSuccessListener(aVoid -> {
                     Toast.makeText(this, "Status updated to " + status, Toast.LENGTH_SHORT).show();
-                    loadRoadIssues(); // Refresh list
                 })
                 .addOnFailureListener(e -> {
                     Toast.makeText(this, "Failed to update: " + e.getMessage(), Toast.LENGTH_SHORT).show();

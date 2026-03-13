@@ -7,12 +7,17 @@ import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.google.android.material.button.MaterialButton;
+import com.google.firebase.auth.FirebaseAuth;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +29,7 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
 
     public interface OnComplaintClickListener {
         void onComplaintClick(Complaint complaint);
+        void onVoteClick(Complaint complaint);
     }
 
     public ComplaintAdapter(List<Complaint> complaintList, OnComplaintClickListener listener) {
@@ -54,6 +60,20 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
         holder.tvStatus.setText(c.getStatus() != null ? c.getStatus() : "Pending");
         holder.tvDate.setText("Date: " + (c.getDate() != null ? c.getDate() : "N/A"));
         holder.tvSubmittedBy.setText("Submitted by: " + (c.getName() != null ? c.getName() : "Anonymous"));
+        
+        // VOTE UI
+        holder.tvVoteCount.setText(c.getVoteCount() + " votes");
+        
+        String currentUid = FirebaseAuth.getInstance().getUid();
+        if (currentUid != null && c.getVoterIds() != null && c.getVoterIds().contains(currentUid)) {
+            holder.btnVote.setText("Voted");
+            holder.btnVote.setEnabled(false);
+            holder.btnVote.setAlpha(0.6f);
+        } else {
+            holder.btnVote.setText("Vote");
+            holder.btnVote.setEnabled(true);
+            holder.btnVote.setAlpha(1.0f);
+        }
 
         // DECODE BASE64 IMAGE
         if (c.getImageUrl() != null && !c.getImageUrl().isEmpty()) {
@@ -80,6 +100,10 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
 
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) listener.onComplaintClick(c);
+        });
+
+        holder.btnVote.setOnClickListener(v -> {
+            if (listener != null) listener.onVoteClick(c);
         });
     }
 
@@ -120,8 +144,9 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
     };
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TextView tvTitle, tvDesc, tvStatus, tvDate, tvSubmittedBy;
+        TextView tvTitle, tvDesc, tvStatus, tvDate, tvSubmittedBy, tvVoteCount;
         ImageView ivComplaintImg;
+        MaterialButton btnVote;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -130,7 +155,9 @@ public class ComplaintAdapter extends RecyclerView.Adapter<ComplaintAdapter.View
             tvStatus = itemView.findViewById(R.id.tvComplaintStatus);
             tvDate = itemView.findViewById(R.id.tvComplaintDate);
             tvSubmittedBy = itemView.findViewById(R.id.tvSubmittedBy);
-            ivComplaintImg = itemView.findViewById(R.id.ivComplaintImage); // Ensure this ID exists in XML
+            ivComplaintImg = itemView.findViewById(R.id.ivComplaintImage);
+            tvVoteCount = itemView.findViewById(R.id.tvVoteCount);
+            btnVote = itemView.findViewById(R.id.btnVote);
         }
     }
 }

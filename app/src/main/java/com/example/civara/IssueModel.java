@@ -1,5 +1,8 @@
 package com.example.civara;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class IssueModel {
     private String title;
     private String description;
@@ -8,6 +11,8 @@ public class IssueModel {
     private String documentId;
     private String email; // Admin panel ke liye
     private String name;  // History aur Display ke liye
+    private List<String> voterIds = new ArrayList<>();
+    private int voteCount = 0;
 
     // Required empty constructor for Firebase
     public IssueModel() {}
@@ -31,6 +36,8 @@ public class IssueModel {
     public String getStatus() { return status; }
     public String getDocumentId() { return documentId; }
     public String getCategory() { return category; }
+    public List<String> getVoterIds() { return voterIds; }
+    public int getVoteCount() { return voteCount; }
 
     // Setters
     public void setEmail(String email) { this.email = email; }
@@ -40,4 +47,9 @@ public class IssueModel {
     public void setDescription(String description) { this.description = description; }
     public void setStatus(String status) { this.status = status; }
     public void setCategory(String category) { this.category = category; }
+    public void setVoterIds(List<String> voterIds) { 
+        this.voterIds = voterIds; 
+        this.voteCount = (voterIds != null) ? voterIds.size() : 0;
+    }
+    public void setVoteCount(int voteCount) { this.voteCount = voteCount; }
 }

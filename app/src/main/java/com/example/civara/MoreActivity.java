@@ -1,23 +1,34 @@
 package com.example.civara;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Base64;
+import android.view.Gravity;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 public class MoreActivity extends AppCompatActivity {
@@ -31,6 +42,11 @@ public class MoreActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Load theme before setting content view
+        ThemeHelper.loadTheme(this);
+        
+        // Set light status bar icons
         getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         setContentView(R.layout.activity_more);
 
@@ -66,27 +82,26 @@ public class MoreActivity extends AppCompatActivity {
             finish();
         });
 
-        // Fixed Feedback Listener
         layoutHelpFeedback.setOnClickListener(v -> showFeedbackDialog());
     }
 
     private void showFeedbackDialog() {
-        final android.widget.EditText etFeedback = new android.widget.EditText(this);
+        final EditText etFeedback = new EditText(this);
         etFeedback.setHint("Write your feedback here...");
         etFeedback.setLines(4);
-        etFeedback.setGravity(android.view.Gravity.TOP);
+        etFeedback.setGravity(Gravity.TOP);
 
-        android.widget.FrameLayout container = new android.widget.FrameLayout(this);
-        android.widget.FrameLayout.LayoutParams params = new android.widget.FrameLayout.LayoutParams(
-                android.view.ViewGroup.LayoutParams.MATCH_PARENT,
-                android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+        FrameLayout container = new FrameLayout(this);
+        FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
         );
         params.leftMargin = 50;
         params.rightMargin = 50;
         etFeedback.setLayoutParams(params);
         container.addView(etFeedback);
 
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setTitle("Help & Feedback")
                 .setMessage("How can we help you? Please provide your feedback below:")
                 .setView(container)
@@ -124,7 +139,7 @@ public class MoreActivity extends AppCompatActivity {
 
     private void showLanguageDialog() {
         String[] languages = {"English", "मराठी (Marathi)", "हिन्दी (Hindi)"};
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setTitle("Select Language")
                 .setItems(languages, (dialog, which) -> {
                     if (which == 0) setLocale("en");
@@ -135,23 +150,24 @@ public class MoreActivity extends AppCompatActivity {
 
     private void showThemeDialog() {
         String[] themes = {"Light Mode", "Dark Mode", "System Default"};
-        new androidx.appcompat.app.AlertDialog.Builder(this)
+        new AlertDialog.Builder(this)
                 .setTitle("Choose Theme")
                 .setItems(themes, (dialog, which) -> {
-                    int mode = (which == 0) ? androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_NO :
-                            (which == 1) ? androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_YES :
-                                    androidx.appcompat.app.AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+                    int mode = (which == 0) ? AppCompatDelegate.MODE_NIGHT_NO :
+                            (which == 1) ? AppCompatDelegate.MODE_NIGHT_YES :
+                                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
                     ThemeHelper.applyTheme(this, mode);
                     recreate();
                 }).show();
     }
 
     private void setLocale(String langCode) {
-        java.util.Locale locale = new java.util.Locale(langCode);
-        java.util.Locale.setDefault(locale);
-        android.content.res.Configuration config = new android.content.res.Configuration();
+        Locale locale = new Locale(langCode);
+        Locale.setDefault(locale);
+        Configuration config = new Configuration();
         config.setLocale(locale);
         getResources().updateConfiguration(config, getResources().getDisplayMetrics());
+        
         Intent intent = new Intent(this, MoreActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         startActivity(intent);
@@ -174,9 +190,11 @@ public class MoreActivity extends AppCompatActivity {
         try {
             byte[] decodedString = Base64.decode(encodedData, Base64.DEFAULT);
             Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
-            ivProfilePic.setImageBitmap(decodedByte);
+            if (decodedByte != null) {
+                ivProfilePic.setImageBitmap(decodedByte);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-} // Class ends here
+}
